@@ -24,6 +24,7 @@
 #include "AlternativeRoutesModel.h"
 #include "RoutingManager.h"
 #include "Maneuver.h"
+#include "ViewportParams.h"
 
 #include <QtCore/QMap>
 #include <QtCore/QAbstractItemModel>
@@ -651,6 +652,7 @@ void RoutingLayerPrivate::clearStopOver()
 RoutingLayer::RoutingLayer( MarbleWidget *widget, QWidget *parent ) :
         QObject( parent ), d( new RoutingLayerPrivate( this, widget ) )
 {
+    setStationary( false );
     connect( widget->model()->routingManager(), SIGNAL(stateChanged(RoutingManager::State)),
              this, SLOT(updateRouteState(RoutingManager::State)) );
     connect( widget, SIGNAL(visibleLatLonAltBoxChanged(GeoDataLatLonAltBox)),

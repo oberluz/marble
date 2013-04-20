@@ -26,6 +26,9 @@ class MARBLE_EXPORT LayerInterface
 {
 public:
 
+    /** Constructor */
+    LayerInterface();
+
     /** Destructor */
     virtual ~LayerInterface();
 
@@ -72,6 +75,20 @@ public:
       * @brief Returns a debug line for perfo/tracing issues
       */
     virtual QString runtimeTrace() const;
+
+    /**
+     * Set the stationary property
+     */
+    void setStationary( bool s );
+    
+    /**
+     * @return stationary property.
+     */
+    bool stationary() const;
+
+ private:
+    class Private;
+    Private * const d;
 };
 
 } // namespace Marble

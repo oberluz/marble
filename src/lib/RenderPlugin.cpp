@@ -37,7 +37,8 @@ class RenderPlugin::Private
           m_item(),
           m_enabled(true),
           m_visible(true),
-          m_userCheckable(true)
+          m_userCheckable(true),
+          m_stationary( true )
     {
     }
 
@@ -54,6 +55,7 @@ class RenderPlugin::Private
     bool                m_enabled;
     bool                m_visible;
     bool                m_userCheckable;
+    bool                m_stationary;
 };
 
 
@@ -178,6 +180,16 @@ bool RenderPlugin::visible() const
 bool RenderPlugin::isUserCheckable() const
 {
     return d->m_userCheckable;
+}
+
+void RenderPlugin::setStationary( bool value )
+{
+    d->m_stationary = value;
+}
+
+bool RenderPlugin::stationary() const
+{
+    return d->m_stationary;
 }
 
 QHash<QString,QVariant> RenderPlugin::settings() const

@@ -24,6 +24,7 @@
 #include "PluginManager.h"
 #include "RenderPlugin.h"
 #include "LayerInterface.h"
+#include "ViewportParams.h"
 
 namespace Marble
 {
@@ -168,7 +169,11 @@ void LayerManager::renderLayers( GeoPainter *painter, ViewportParams *viewport )
         QTime timer;
         foreach( LayerInterface *layer, layers ) {
             timer.start();
+            if ( !layer->stationary() )
+                painter->translate( viewport->pan() );
             layer->render( painter, viewport, renderPosition, 0 );
+            if ( !layer->stationary() )
+                painter->translate( -viewport->pan() );
             traceList.append( QString("%2 ms %3").arg( timer.elapsed(),3 ).arg( layer->runtimeTrace() ) );
         }
     }

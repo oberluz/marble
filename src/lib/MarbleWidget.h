@@ -644,6 +644,25 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
     void rotateBy( const qreal deltaLon, const qreal deltaLat, FlyToMode mode = Instant );
 
     /**
+     * @brief  Pan the view
+     * @param  x  horizontal distance
+     * @param  y  vertical distance
+     */
+    void pan( const int x, const int y );
+
+    /**
+     * @brief  Pan the view
+     * @param  p  distance
+     */
+    void pan( const QPoint& p );
+
+    /**
+     * @brief Returns the current pan displacement
+     * @return the current pan displacement
+     */
+    QPoint pan() const;
+
+    /**
      * @brief  Center the view on a geographical point
      * @param  lat  an angle in degrees parallel to the latitude lines
      *              +90(N) - -90(S)
@@ -736,7 +755,25 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
       */
     void flyTo( const GeoDataLookAt &lookAt, FlyToMode mode = Automatic );
 
-    //@}
+    /**
+     * @brief  Pan left by the moveStep.
+     */
+    void panLeft( );
+
+    /**
+     * @brief  Pan right by the moveStep.
+     */
+    void panRight( );
+
+    /**
+     * @brief  Pan up by the moveStep.
+     */
+    void panUp( );
+
+    /**
+     * @brief  Pan down by the moveStep.
+     */
+    void panDown( );
 
     /// @name Float items and map appearance slots
     //@{
@@ -1065,6 +1102,8 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
      * @deprecated implement LayerInterface and add it using @p addLayer()
      */
     virtual void customPaint( GeoPainter *painter );
+
+    QTransform transform() const;
 
  private:
     Q_PRIVATE_SLOT( d, void updateMapTheme() )

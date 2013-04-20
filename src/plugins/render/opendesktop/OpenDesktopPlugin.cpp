@@ -33,6 +33,7 @@ OpenDesktopPlugin::OpenDesktopPlugin( const MarbleModel *marbleModel )
 {
     setEnabled( true ); // Plugin is enabled by default
     setVisible( false ); // Plugin is invisible by default
+    setStationary ( false ); // Plugin items are panned
 }
 
 void OpenDesktopPlugin::initialize()

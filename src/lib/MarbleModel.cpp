@@ -83,6 +83,7 @@ class MarbleModelPrivate
           m_mapThemeManager(),
           m_homePoint( -9.4, 54.8, 0.0, GeoDataCoordinates::Degree ),  // Some point that tackat defined. :-)
           m_homeZoom( 1050 ),
+          m_homePan( 0, 0 ),
           m_mapTheme( 0 ),
           m_storagePolicy( MarbleDirs::localPath() ),
           m_downloadManager( &m_storagePolicy ),
@@ -120,6 +121,7 @@ class MarbleModelPrivate
     // The home position
     GeoDataCoordinates       m_homePoint;
     int                      m_homeZoom;
+    QPoint                   m_homePan;
 
     // View and paint stuff
     GeoSceneDocument        *m_mapTheme;
@@ -370,23 +372,27 @@ void MarbleModel::setMapThemeId( const QString &mapThemeId )
     emit themeChanged( mapTheme->head()->mapThemeId() );
 }
 
-void MarbleModel::home( qreal &lon, qreal &lat, int& zoom ) const
+void MarbleModel::home( qreal &lon, qreal &lat, int& zoom, int& panX, int& panY ) const
 {
     d->m_homePoint.geoCoordinates( lon, lat, GeoDataCoordinates::Degree );
     zoom = d->m_homeZoom;
+    panX = d->m_homePan.x();
+    panY = d->m_homePan.y();
 }
 
-void MarbleModel::setHome( qreal lon, qreal lat, int zoom )
+void MarbleModel::setHome( qreal lon, qreal lat, int zoom, int panx, int pany )
 {
     d->m_homePoint = GeoDataCoordinates( lon, lat, 0, GeoDataCoordinates::Degree );
     d->m_homeZoom = zoom;
+    d->m_homePan = QPoint( panx, pany );
     emit homeChanged( d->m_homePoint );
 }
 
-void MarbleModel::setHome( const GeoDataCoordinates& homePoint, int zoom )
+void MarbleModel::setHome( const GeoDataCoordinates& homePoint, int zoom, int panx, int pany )
 {
     d->m_homePoint = homePoint;
     d->m_homeZoom = zoom;
+    d->m_homePan = QPoint( panx, pany );
     emit homeChanged( d->m_homePoint );
 }
 

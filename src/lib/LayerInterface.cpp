@@ -13,6 +13,27 @@
 namespace Marble
 {
 
+class LayerInterface::Private
+{
+  public:
+    Private( )
+        : m_stationary( true )
+    {
+    }
+
+    ~Private()
+    {
+    }
+
+    bool                m_stationary;
+};
+
+LayerInterface::LayerInterface()
+    : d( new Private( ) )
+{
+
+}
+
 LayerInterface::~LayerInterface()
 {
     // nothing to do
@@ -27,6 +48,16 @@ qreal LayerInterface::zValue() const
 QString LayerInterface::runtimeTrace() const
 {
     return QString();
+}
+
+void LayerInterface::setStationary( bool value )
+{
+    d->m_stationary = value;
+}
+
+bool LayerInterface::stationary() const
+{
+    return d->m_stationary;
 }
 
 } // namespace Marble

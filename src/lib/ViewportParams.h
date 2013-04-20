@@ -97,12 +97,19 @@ class MARBLE_EXPORT ViewportParams
 
     void centerOn( qreal lon, qreal lat );
 
+    void pan(QPoint translation);
+    QPoint pan() const;
+
     Quaternion planetAxis() const;
     const matrix &planetAxisMatrix() const;
 
     int width()  const;
     int height() const;
     QSize size() const;
+
+    int vwidth() const;
+    int vheight() const;
+    QSize vsize() const;
 
     void setWidth(int newWidth);
     void setHeight(int newHeight);

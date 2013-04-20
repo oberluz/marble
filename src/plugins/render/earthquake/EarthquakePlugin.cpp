@@ -24,6 +24,7 @@ EarthquakePlugin::EarthquakePlugin()
       m_ui( 0 ),
       m_configDialog( 0 )
 {
+    setStationary( false );
 }
 
 EarthquakePlugin::EarthquakePlugin( const MarbleModel *marbleModel )
@@ -35,6 +36,7 @@ EarthquakePlugin::EarthquakePlugin( const MarbleModel *marbleModel )
       m_endDate( marbleModel->clockDateTime() ),
       m_maximumNumberOfItems( 100 )
 {
+    setStationary( false );
     setEnabled( true ); // Plugin is enabled by default
     setVisible( false ); // Plugin is invisible by default
     connect( this, SIGNAL(settingsChanged(QString)),

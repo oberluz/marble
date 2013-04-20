@@ -18,6 +18,7 @@ namespace Marble
 VectorMapLayer::VectorMapLayer( VectorComposer *vectorComposer )
     : m_vectorComposer( vectorComposer )
 {
+    setStationary( false );
 }
 
 QStringList VectorMapLayer::renderPosition() const

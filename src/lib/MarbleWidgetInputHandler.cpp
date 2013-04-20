@@ -197,6 +197,9 @@ class MarbleWidgetDefaultInputHandler::Private
     // The center latitude in radian when the left mouse button has been pressed.
     qreal m_leftPressedLat;
 
+    QPointF m_mousePoint;
+    QPoint m_moveClickLoc;
+
     int m_dragThreshold;
     QTimer m_lmbTimer;
 
@@ -486,6 +489,13 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
 
         QPoint mousePosition( event->x(), event->y() );
 
+        // Record pan start position when &mouse left button and shift are pressed simmultaneously
+        if ( e->type() == QEvent::MouseButtonPress && event->button() == Qt::LeftButton
+             && event->modifiers() & Qt::ShiftModifier )
+        {
+            d->m_moveClickLoc = event->pos();
+        }
+
         if ( isMouseAboveMap || d->m_selectionRubber.isVisible()
              || MarbleWidgetInputHandler::d->m_widget->whichFeatureAt( mousePosition ).size() != 0) {
             
@@ -618,12 +628,35 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
 
                     d->m_lmbTimer.stop();
 
-                    const qreal posLon = d->m_leftPressedLon - 90.0 * d->m_leftPressedDirection * deltax / radius;
-                    const qreal posLat = d->m_leftPressedLat + 90.0 * deltay / radius;
-                    MarbleWidgetInputHandler::d->m_widget->centerOn( posLon, posLat );
-                    if ( MarbleWidgetInputHandler::d->m_inertialEarthRotation ) {
-                        d->m_kineticSpinning.setPosition( posLon, posLat );
-                    }
+		    if (event->modifiers() & Qt::ShiftModifier && MarbleWidgetInputHandler::d->m_widget->projection() == Spherical )
+		    {
+                        const bool isMouseAboveWidget = ( event->x() > 0 && event->x() <= MarbleWidgetInputHandler::d->m_widget->viewport()->width() &&
+                                                          event->y() > 0 && event->y() <= MarbleWidgetInputHandler::d->m_widget->viewport()->height() );
+                       
+                        if ( isMouseAboveWidget )
+                        {
+                            QTransform screen2World = MarbleWidgetInputHandler::d->m_widget->transform().inverted();
+
+                            QLine l(d->m_moveClickLoc, event->pos());
+                            QLine transLine = screen2World.map(l);
+
+                            MarbleWidgetInputHandler::d->m_widget->pan(transLine.dx(), transLine.dy());
+                            d->m_moveClickLoc = event->pos();
+
+                            //qDebug() << "pan (" << transLine.dx() << "," << transLine.dy() << ")";
+                        }
+
+                        return QObject::eventFilter( o, e );
+		    }
+		    else
+		    {
+			    const qreal posLon = d->m_leftPressedLon - 90.0 * d->m_leftPressedDirection * deltax / radius;
+			    const qreal posLat = d->m_leftPressedLat + 90.0 * deltay / radius;
+			    MarbleWidgetInputHandler::d->m_widget->centerOn( posLon, posLat );
+                            if ( MarbleWidgetInputHandler::d->m_inertialEarthRotation ) {
+                                d->m_kineticSpinning.setPosition( posLon, posLat );
+                            }
+		    }
                 }
             }
 
@@ -648,6 +681,7 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
             }
 
             QRect boundingRect = MarbleWidgetInputHandler::d->m_widget->mapRegion().boundingRect();
+            boundingRect = boundingRect.translated(MarbleWidgetInputHandler::d->m_widget->pan());
 
             if ( boundingRect.width() != 0 ) {
                 dirX = (int)( 3 * ( event->x() - boundingRect.left() ) / boundingRect.width() ) - 1;
@@ -688,7 +722,7 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
 
         // Find out if there are data items and if one has defined an action
         QList<AbstractDataPluginItem *> dataItems
-            = MarbleWidgetInputHandler::d->m_widget->whichItemAt( mousePosition );
+            = MarbleWidgetInputHandler::d->m_widget->whichItemAt( mousePosition - MarbleWidgetInputHandler::d->m_widget->pan() );
         bool dataAction = false;
         QPointer<AbstractDataPluginItem> toolTipItem;
         QList<AbstractDataPluginItem *>::iterator it = dataItems.begin();
@@ -827,6 +861,33 @@ bool MarbleWidgetDefaultInputHandler::keyEvent( MarbleWidget * widget, QEvent* e
         QKeyEvent const * const k = dynamic_cast<QKeyEvent const * const>( e );
         Q_ASSERT( k );
 
+       if (k->modifiers() & Qt::ShiftModifier)
+       switch ( k->key() ) {
+        case Qt::Key_Left:
+            widget->panLeft();
+            break;
+        case Qt::Key_Up:
+            widget->panUp();
+            break;
+        case Qt::Key_Right:
+            widget->panRight();
+            break;
+        case Qt::Key_Down:
+            widget->panDown();
+            break;
+        case Qt::Key_Plus:
+            widget->zoomIn();
+            break;
+        case Qt::Key_Minus:
+            widget->zoomOut();
+            break;
+        case Qt::Key_Home:
+            widget->goHome();
+            break;
+        default:
+            break;
+        }
+        else
         switch ( k->key() ) {
         case Qt::Key_Left:
             widget->moveLeft();

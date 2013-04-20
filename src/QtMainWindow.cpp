@@ -540,7 +540,8 @@ void MainWindow::manageBookmarks()
 void MainWindow::setHome()
 {
     MarbleWidget *widget = m_controlView->marbleWidget();
-    widget->model()->setHome( widget->centerLongitude(), widget->centerLatitude(), widget->zoom() );
+    widget->model()->setHome( widget->centerLongitude(), widget->centerLatitude(), widget->zoom(),
+                              widget->pan().x(), widget->pan().y() );
 }
 
 void MainWindow::openEditBookmarkDialog()
@@ -1069,7 +1070,9 @@ void MainWindow::readSettings(const QVariantMap& overrideSettings)
          m_controlView->marbleModel()->setHome(
             settings.value("homeLongitude", 9.4).toDouble(),
             settings.value("homeLatitude", 54.8).toDouble(),
-            settings.value("homeZoom", 1050 ).toInt()
+            settings.value("homeZoom", 1050 ).toInt(),
+            settings.value("homePanX", 0).toInt(),
+            settings.value("homePanY", 0).toInt()
          );
 
          // Center on/Distance
@@ -1086,6 +1089,9 @@ void MainWindow::readSettings(const QVariantMap& overrideSettings)
                 m_controlView->marbleWidget()->centerOn(
                     settings.value("quitLongitude", 0.0).toDouble(),
                     settings.value("quitLatitude", 0.0).toDouble() );
+                m_controlView->marbleWidget()->pan(
+                    settings.value("quitPanX", 0.0).toInt(),
+                    settings.value("quitPanY", 0.0).toInt() );
                 if (! isDistanceOverwritten) {
                     // set default radius to 1350 (Atlas theme's "sharp" radius)
                     m_controlView->marbleWidget()->setRadius( settings.value("quitRadius", 1350).toInt() );
@@ -1255,13 +1261,17 @@ void MainWindow::writeSettings()
          qreal homeLon = 0;
          qreal homeLat = 0;
          int homeZoom = 0;
-         m_controlView->marbleModel()->home( homeLon, homeLat, homeZoom );
+         int homePanX = 0;
+         int homePanY = 0;
+         m_controlView->marbleModel()->home( homeLon, homeLat, homeZoom, homePanX, homePanY );
          QString  mapTheme = m_controlView->marbleWidget()->mapThemeId();
          int      projection = (int)( m_controlView->marbleWidget()->projection() );
 
          settings.setValue( "homeLongitude", homeLon );
          settings.setValue( "homeLatitude",  homeLat );
          settings.setValue( "homeZoom",      homeZoom );
+         settings.setValue( "homePanX",      homePanX );
+         settings.setValue( "homePanY",      homePanY );
 
          settings.setValue( "mapTheme",   mapTheme );
          settings.setValue( "projection", projection );
@@ -1269,11 +1279,15 @@ void MainWindow::writeSettings()
          // Get the 'quit' values from the widget and store them in the settings.
          qreal  quitLon = m_controlView->marbleWidget()->centerLongitude();
          qreal  quitLat = m_controlView->marbleWidget()->centerLatitude();
+         int    quitPanX = m_controlView->marbleWidget()->pan().x();
+         int    quitPanY = m_controlView->marbleWidget()->pan().y();
          const int quitRadius = m_controlView->marbleWidget()->radius();
 
          settings.setValue( "quitLongitude", quitLon );
          settings.setValue( "quitLatitude", quitLat );
          settings.setValue( "quitRadius", quitRadius );
+         settings.setValue( "quitPanX", quitPanX );
+         settings.setValue( "quitPanY", quitPanY );
 
          settings.setValue( "lockFloatItemPositions", m_lockFloatItemsAct->isChecked() );
      settings.endGroup();

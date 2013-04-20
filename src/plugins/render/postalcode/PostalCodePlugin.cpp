@@ -16,6 +16,7 @@ using namespace Marble;
 PostalCodePlugin::PostalCodePlugin()
     : AbstractDataPlugin( 0 )
 {
+    setStationary( false );
 }
 
 PostalCodePlugin::PostalCodePlugin( const MarbleModel *marbleModel )
@@ -23,6 +24,7 @@ PostalCodePlugin::PostalCodePlugin( const MarbleModel *marbleModel )
 {
     setEnabled( true );
     setVisible( false );
+    setStationary( false );
 }
 
 void PostalCodePlugin::initialize()

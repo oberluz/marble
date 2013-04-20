@@ -51,6 +51,8 @@ WeatherPlugin::WeatherPlugin( const MarbleModel *marbleModel )
     setEnabled( true );
     // Plugin is not visible by default
     setVisible( false );
+    // Plugin items pan
+    setStationary( false );
 
     connect( this, SIGNAL(settingsChanged(QString)),
              this, SLOT(updateItemSettings()) );

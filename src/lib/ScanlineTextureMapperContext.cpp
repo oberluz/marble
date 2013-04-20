@@ -401,7 +401,7 @@ bool ScanlineTextureMapperContext::isOutOfTileRange( const int itLon, const int 
 int ScanlineTextureMapperContext::interpolationStep( const ViewportParams *viewport, MapQuality mapQuality )
 {
     if ( mapQuality == PrintQuality ) {
-        return 1;    // Don't interpolate for print quality.
+        return 1;    // Don't interpolate for print quality
     }
 
     if ( ! viewport->mapCoversViewport() ) {

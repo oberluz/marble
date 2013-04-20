@@ -243,6 +243,7 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
 
     GeoPainter painter( &m_coastImage, viewport, mapQuality );
     painter.setRenderHint( QPainter::Antialiasing, antialiased );
+    painter.translate(viewport->pan());
 
     if ( m_landDocuments.isEmpty() ) {
         m_veccomposer->drawTextureMap( &painter, viewport );
@@ -261,7 +262,7 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
 
     int     bump = 8;
 
-    if ( radius * radius > imgradius
+    if (( radius * radius > imgradius && viewport->pan().isNull() )
          || viewport->projection() == Equirectangular
          || viewport->projection() == Mercator )
     {
@@ -318,21 +319,50 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
         }
     }
     else {
-        int yTop    = ( imgry-radius < 0 ) ? 0 : imgry-radius;
-        const int yBottom = ( yTop == 0 ) ? imgheight : imgry + radius;
+        int viewportHeight = viewport->height();
+        int pany = viewport->pan().y();
+        int skip = 0;
+        int yTop = 0;
+        if ( viewportHeight / 2 - radius + pany > 0 )
+        {
+            yTop = viewportHeight / 2 - radius + pany;
+            if ( yTop > viewportHeight )
+                yTop = viewportHeight;
+        }
+        int yBottom = 0;
+        if ( viewportHeight / 2 + radius + pany > 0 )
+        {
+            yBottom = viewportHeight / 2 + radius + pany - skip;
+            if ( yBottom > viewportHeight )
+                yBottom = viewportHeight - skip;
+        }
+        if ( yTop == yBottom )
+            return;
+
+        const int viewportWidth = viewport->width();
+        const int panx = viewport->pan().x();
 
         EmbossFifo  emboss;
 
         for ( int y = yTop; y < yBottom; ++y ) {
-            const int  dy = imgry - y;
+            const int  dy = imgry - y + pany;
             int  rx = (int)sqrt( (qreal)( radius * radius - dy * dy ) );
             int  xLeft  = 0; 
-            int  xRight = imgwidth;
-
-            if ( imgrx-rx > 0 ) {
-                xLeft  = imgrx - rx; 
-                xRight = imgrx + rx;
+            if ( viewportWidth / 2 - rx + panx > 0 )
+            {
+                xLeft = viewportWidth / 2 - rx + panx;
+                if ( xLeft > viewportWidth )
+                    xLeft = viewportWidth;
             }
+            int  xRight = 0;
+            if ( viewportWidth / 2 + rx + panx > 0 )
+            {
+                xRight = viewportWidth / 2 + rx + panx;
+                if ( xRight > viewportWidth )
+                    xRight = viewportWidth;
+            }
+            if ( xLeft == xRight )
+                continue;
 
             QRgb  *writeData         = (QRgb*)( origimg->scanLine( y ) )  + xLeft;
             const QRgb *coastData    = (QRgb*)( m_coastImage.scanLine( y ) ) + xLeft;

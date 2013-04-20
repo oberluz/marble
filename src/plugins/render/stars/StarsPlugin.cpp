@@ -60,6 +60,7 @@ StarsPlugin::StarsPlugin( const MarbleModel *marbleModel )
       m_celestialPoleBrush( Marble::Oxygen::aluminumGray5 )
 {
     prepareNames();
+    setStationary( true );
 }
 
 QStringList StarsPlugin::backendTypes() const
@@ -1276,8 +1277,8 @@ bool StarsPlugin::render( GeoPainter *painter, ViewportParams *viewport,
                 continue;
             }
 
-            qreal  earthCenteredX = qpos.v[Q_X] * skyRadius;
-            qreal  earthCenteredY = qpos.v[Q_Y] * skyRadius;
+            qreal  earthCenteredX = qpos.v[Q_X] * skyRadius - viewport->pan().x();
+            qreal  earthCenteredY = qpos.v[Q_Y] * skyRadius + viewport->pan().y();
 
             // Don't draw high placemarks (e.g. satellites) that aren't visible.
             if ( qpos.v[Q_Z] < 0
@@ -1292,8 +1293,8 @@ bool StarsPlugin::render( GeoPainter *painter, ViewportParams *viewport,
             const int y = ( int )( viewport->height() / 2 - skyRadius * qpos.v[Q_Y] );
 
             // Skip placemarks that are outside the screen area
-            if ( x < 0 || x >= viewport->width()
-                    || y < 0 || y >= viewport->height() )
+            if ( x < 0 || x >= viewport->vwidth()
+                    || y < 0 || y >= viewport->vheight() )
                 continue;
 
             // Show star if it is brighter than magnitude threshold

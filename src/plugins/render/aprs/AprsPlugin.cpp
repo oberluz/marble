@@ -420,6 +420,7 @@ bool AprsPlugin::render( GeoPainter *painter, ViewportParams *viewport, const QS
     int hidetime = m_hideTime * 60000;
 
     painter->save();
+    painter->translate( viewport->pan() );
 
     if ( !( viewport->viewLatLonAltBox() == m_lastBox ) ) {
         m_lastBox = viewport->viewLatLonAltBox();

@@ -82,8 +82,8 @@ bool SphericalProjection::screenCoordinates( const qreal lon, const qreal lat,
     x = ( viewport->width()  / 2 + (qreal)( viewport->radius() ) * p.v[Q_X] );
     y = ( viewport->height() / 2 - (qreal)( viewport->radius() ) * p.v[Q_Y] );
  
-    return (    ( 0 <= y && y < viewport->height() )
-             && ( 0 <= x && x < viewport->width() ) 
+    return (( 0 <= ( y + viewport->pan().y() ) && y < viewport->vheight() )
+             && ( 0 <= ( x + viewport->pan().x() ) && x < viewport->vwidth() )
              && p.v[Q_Z] > 0 );
 }
 
@@ -121,8 +121,8 @@ bool SphericalProjection::screenCoordinates( const GeoDataCoordinates &coordinat
     }
 
     // Let (x, y) be the position on the screen of the placemark..
-    x = ((qreal)(viewport->width())  / 2 + pixelAltitude * qpos.v[Q_X]);
-    y = ((qreal)(viewport->height()) / 2 - pixelAltitude * qpos.v[Q_Y]);
+    x = ((qreal)(viewport->width()) / 2 + viewport->pan().x() + pixelAltitude * qpos.v[Q_X]);
+    y = ((qreal)(viewport->height()) / 2 + viewport->pan().y() - pixelAltitude * qpos.v[Q_Y]);
 
     // Skip placemarks that are outside the screen area
     if ( x < 0 || x >= viewport->width() || y < 0 || y >= viewport->height() ) {
@@ -198,9 +198,10 @@ bool SphericalProjection::geoCoordinates( const int x, const int y,
                                           GeoDataCoordinates::Unit unit ) const
 {
     const qreal  inverseRadius = 1.0 / (qreal)(viewport->radius());
+    const QPoint pan = viewport->pan();
 
-    const qreal qx = +(qreal)( x - viewport->width()  / 2 ) * inverseRadius;
-    const qreal qy = -(qreal)( y - viewport->height() / 2 ) * inverseRadius;
+    const qreal qx = +(qreal)( x - pan.x() - viewport->width()  / 2 ) * inverseRadius;
+    const qreal qy = -(qreal)( y - pan.y() - viewport->height() / 2 ) * inverseRadius;
 
     if ( 1 <= qx * qx + qy * qy ) {
         return false;
@@ -231,8 +232,8 @@ GeoDataLatLonAltBox SphericalProjection::latLonAltBox( const QRect& screenRect,
     // analytically the lon-/lat- range.
     qreal pitch = GeoDataCoordinates::normalizeLat( viewport->planetAxis().pitch() );
 
-    if ( 2.0 * viewport->radius() <= viewport->height()
-         &&  2.0 * viewport->radius() <= viewport->width() )
+    if ( 2.0 * viewport->radius() <= viewport->vheight()
+         &&  2.0 * viewport->radius() <= viewport->vwidth() )
     { 
         // Unless the planetaxis is in the screen plane the allowed longitude range
         // covers full -180 deg to +180 deg:
@@ -287,16 +288,26 @@ bool SphericalProjection::mapCoversViewport( const ViewportParams *viewport ) co
     qint64  width  = viewport->width();
     qint64  height = viewport->height();
 
-    // This first test is a quick one that will catch all really big
-    // radii and prevent overflow in the real test.
-    if ( radius > width + height )
-        return true;
+    if ( viewport->pan().isNull() )
+    {
+        // This first test is a quick one that will catch all really big
+        // radii and prevent overflow in the real test.
+        if ( radius > width + height )
+            return true;
 
-    // This is the real test.  The 4 is because we are really
-    // comparing to width/2 and height/2.
-    if ( 4 * radius * radius >= width * width + height * height )
-        return true;
+        // This is the real test.  The 4 is because we are really
+        // comparing to width/2 and height/2.
+        if ( 4 * radius * radius >= width * width + height * height )
+            return true;
+    }
+    else
+    {
+        qint64 w = viewport->vwidth();
+        qint64 h = viewport->vheight();
 
+        if ( 4 * radius * radius >= w * w + h * h )
+            return true;
+    }
     return false;
 }
 

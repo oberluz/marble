@@ -23,6 +23,7 @@
 #include <QtGui/QRegion>
 #include <QtGui/QSizePolicy>
 #include <QtNetwork/QNetworkProxy>
+#include <QTransform>
 
 #ifdef MARBLE_DBUS
 #include <QtDBus/QDBusConnection>
@@ -100,7 +101,8 @@ class MarbleWidgetPrivate
           m_customPaintLayer( parent ),
           m_popupmenu( 0 ),
           m_showFrameRate( false ),
-          m_viewAngle( 110.0 )
+          m_viewAngle( 110.0 ),
+          m_renderStars( false )
     {
     }
 
@@ -125,6 +127,13 @@ class MarbleWidgetPrivate
     void moveByStep( int stepsRight, int stepsDown, FlyToMode mode );
 
     /**
+      * @brief Pan the globe in the given direction in discrete steps
+      * @param stepsRight Number of steps to go right. Negative values go left.
+      * @param stepsDown Number of steps to go down. Negative values go up.
+      */
+    void panByStep( int stepsRight, int stepsDown );
+
+    /**
       * @brief Update widget flags and cause a full repaint
       *
       * The background of the widget only needs to be redrawn in certain cases. This
@@ -136,6 +145,7 @@ class MarbleWidgetPrivate
     // The model we are showing.
     MarbleModel     m_model;
     MarbleMap       m_map;
+    QTransform      m_worldTransform;
 
     bool m_animationsEnabled;
 
@@ -156,6 +166,8 @@ class MarbleWidgetPrivate
     bool             m_showFrameRate;
 
     const qreal      m_viewAngle;
+
+    bool             m_renderStars;
 };
 
 
@@ -268,6 +280,14 @@ void MarbleWidgetPrivate::moveByStep( int stepsRight, int stepsDown, FlyToMode m
     qreal left = polarity * stepsRight * m_widget->moveStep();
     qreal down = stepsDown * m_widget->moveStep();
     m_widget->rotateBy( left, down, mode );
+}
+
+void MarbleWidgetPrivate::panByStep( int stepsRight, int stepsDown )
+{
+    int polarity = m_widget->viewport()->polarity();
+    qreal left = polarity * stepsRight * m_widget->moveStep();
+    qreal down = stepsDown * m_widget->moveStep();
+    m_widget->pan( left, down );
 }
 
 void MarbleWidgetPrivate::updateSystemBackgroundAttribute()
@@ -623,6 +643,29 @@ void MarbleWidget::rotateBy( const qreal deltaLon, const qreal deltaLat, FlyToMo
     flyTo( target, mode );
 }
 
+void MarbleWidget::pan( const int x, const int y)
+{
+    pan( QPoint( x, y ) );
+}
+
+void MarbleWidget::pan( const QPoint& p )
+{
+    d->m_map.viewport()->pan( p );
+    
+    // So far displaying stars is only supported on earth.
+    if ( d->m_map.viewport()->projection() == Spherical && model()->planetId() == "earth")
+    {
+        const bool renderStars = !d->m_map.viewport()->mapCoversViewport();
+        if ( renderStars &&  renderStars != d->m_renderStars )
+            d->updateSystemBackgroundAttribute();
+    }
+    update();
+}
+
+QPoint MarbleWidget::pan() const
+{
+    return d->m_map.viewport()->pan();
+}
 
 void MarbleWidget::centerOn( const qreal lon, const qreal lat, bool animated )
 {
@@ -720,6 +763,26 @@ void MarbleWidget::moveUp( FlyToMode mode )
 void MarbleWidget::moveDown( FlyToMode mode )
 {
     d->moveByStep( 0, 1, mode );
+}
+
+void MarbleWidget::panLeft( )
+{
+    d->panByStep( -1, 0 );
+}
+
+void MarbleWidget::panRight( )
+{
+    d->panByStep( 1, 0 );
+}
+
+void MarbleWidget::panUp( )
+{
+    d->panByStep( 0, -1 );
+}
+
+void MarbleWidget::panDown( )
+{
+    d->panByStep( 0, 1 );
 }
 
 void MarbleWidget::leaveEvent( QEvent* )
@@ -844,12 +907,16 @@ void MarbleWidget::goHome( FlyToMode mode )
     qreal  homeLon = 0;
     qreal  homeLat = 0;
     int homeZoom = 0;
-    d->m_model.home( homeLon, homeLat, homeZoom );
+    int homePanx = 0;
+    int homePany = 0;
+    d->m_model.home( homeLon, homeLat, homeZoom, homePanx, homePany );
 
     GeoDataLookAt target;
     target.setLongitude( homeLon, GeoDataCoordinates::Degree );
     target.setLatitude( homeLat, GeoDataCoordinates::Degree );
     target.setRange( 1000 * distanceFromZoom( homeZoom ) );
+    viewport()->pan(QPoint(homePanx - pan().x(), homePany - pan().y()));
+    
 
     flyTo( target, mode );
 }
@@ -1405,6 +1472,11 @@ RoutingLayer* MarbleWidget::routingLayer()
 MapInfoDialog *MarbleWidget::mapInfoDialog()
 {
     return d->m_mapInfoDialog;
+}
+
+QTransform MarbleWidget::transform() const
+{
+    return d->m_worldTransform;
 }
 
 }

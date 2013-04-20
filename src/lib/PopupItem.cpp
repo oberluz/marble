@@ -263,7 +263,7 @@ bool PopupItem::eventFilter( QObject *object, QEvent *e )
     {
         // Mouse events are forwarded to the underlying widget
         QMouseEvent *event = static_cast<QMouseEvent*> ( e );
-        QPoint shiftedPos = event->pos();
+        QPoint shiftedPos = event->pos() - widget->pan();
         QWidget* child = transform( shiftedPos );
         bool const forcedMouseRelease = m_needMouseRelease && e->type() == QEvent::MouseButtonRelease;
         if ( child || forcedMouseRelease ) {
@@ -287,7 +287,7 @@ bool PopupItem::eventFilter( QObject *object, QEvent *e )
     } else if ( e->type() == QEvent::Wheel ) {
         // Wheel events are forwarded to the underlying widget
         QWheelEvent *event = static_cast<QWheelEvent*> ( e );
-        QPoint shiftedPos = event->pos();
+        QPoint shiftedPos = event->pos() - widget->pan();
         QWidget* child = transform( shiftedPos );
         if ( child ) {
             QWheelEvent shiftedEvent = QWheelEvent( shiftedPos,

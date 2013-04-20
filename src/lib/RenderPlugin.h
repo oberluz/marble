@@ -51,6 +51,7 @@ class MARBLE_EXPORT RenderPlugin : public QObject, public RenderPluginInterface
     Q_PROPERTY ( bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged )
     Q_PROPERTY ( bool visible READ visible WRITE setVisible NOTIFY visibilityChanged )
     Q_PROPERTY ( bool userCheckable READ isUserCheckable WRITE setUserCheckable NOTIFY userCheckableChanged )
+    Q_PROPERTY ( bool stationary READ stationary WRITE setStationary )
 
  public:
     /**
@@ -233,6 +234,16 @@ class MARBLE_EXPORT RenderPlugin : public QObject, public RenderPluginInterface
      * @see isUserCheckable
      */
     void    setUserCheckable(bool isUserCheckable);
+
+    /**
+     * Set the stationary property
+     */
+    void setStationary( bool s );
+    
+    /**
+     * @return stationary property.
+     */
+    bool stationary() const;
 
     /**
      * @brief Passes an empty set of settings to the plugin

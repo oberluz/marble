@@ -47,6 +47,8 @@ WikipediaPlugin::WikipediaPlugin( const MarbleModel *marbleModel )
     setEnabled( true );
     // Plugin is not visible by default
     setVisible( false );
+    // Plugin pans items
+    setStationary( false );
     
     connect( this, SIGNAL(settingsChanged(QString)),
              this, SLOT(updateSettings()) );

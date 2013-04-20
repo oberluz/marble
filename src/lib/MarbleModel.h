@@ -158,21 +158,27 @@ class MARBLE_EXPORT MarbleModel : public QObject
      * @param  lon  the longitude of the home point.
      * @param  lat  the latitude of the home point.
      * @param  zoom the default zoom level of the home point.
+     * @param  panx the default horizontal pan translation of the home point.
+     * @param  pany the default vertical pan translation of the home point.
      */
-    void home( qreal &lon, qreal &lat, int& zoom ) const;
+    void home( qreal &lon, qreal &lat, int& zoom, int& panx, int& pany ) const;
     /**
      * @brief  Set the home point
      * @param  lon  the longitude of the new home point.
      * @param  lat  the latitude of the new home point.
      * @param  zoom the default zoom level for the new home point.
+     * @param  panx the default horizontal pan translation for the new home point.
+     * @param  pany the default vertical pan translation for the new home point.
      */
-    void setHome( qreal lon, qreal lat, int zoom = 1050 );
+    void setHome( qreal lon, qreal lat, int zoom = 1050, int panx = 0, int pany = 0 );
     /**
      * @brief  Set the home point
      * @param  homePoint  the new home point.
      * @param  zoom       the default zoom level for the new home point.
+     * @param  panx       the default horizontal pan translation for the new home point.
+     * @param  pany       the default vertical pan translation for the new home point.
      */
-    void setHome( const GeoDataCoordinates& homePoint, int zoom = 1050 );
+    void setHome( const GeoDataCoordinates& homePoint, int zoom = 1050, int panx = 0, int pany = 0 );
 
     MapThemeManager *mapThemeManager();
 

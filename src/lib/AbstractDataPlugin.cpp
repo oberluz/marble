@@ -103,12 +103,16 @@ bool AbstractDataPlugin::render( GeoPainter *painter, ViewportParams *viewport,
     } else {
         QList<AbstractDataPluginItem*> items = d->m_model->items( viewport, numberOfItems() );
         painter->save();
+        if ( !stationary() )
+            painter->translate(viewport->pan());
 
         // Paint the most important item at last
         for( int i = items.size() - 1; i >= 0; --i ) {
             items.at( i )->paintEvent( painter, viewport );
         }
 
+        if ( !stationary() )
+        painter->translate(-viewport->pan());
         painter->restore();
     }
     
@@ -199,6 +203,11 @@ void AbstractDataPlugin::handleViewportChange( ViewportParams* viewport )
     foreach( AbstractDataPluginItem* item, items ) {
         qreal x, y;
         Marble::GeoDataCoordinates const coordinates = item->coordinate();
+        if (!stationary())
+        {
+            x += viewport->pan().x();
+            y += viewport->pan().y();
+        }
         bool const visible = viewport->screenCoordinates( coordinates.longitude(), coordinates.latitude(), x, y );
 
         if ( !d->m_delegateInstances.contains( item ) ) {

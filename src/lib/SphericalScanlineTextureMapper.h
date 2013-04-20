@@ -59,6 +59,7 @@ class SphericalScanlineTextureMapper : public TextureMapperInterface
     int m_radius;
     QImage m_canvasImage;
     QThreadPool m_threadPool;
+    QPoint m_pan;
 };
 
 }

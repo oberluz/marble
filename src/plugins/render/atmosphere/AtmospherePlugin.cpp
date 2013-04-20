@@ -153,8 +153,8 @@ bool AtmospherePlugin::render( GeoPainter *painter,
     }
     int  imageHalfWidth  = viewParams->width() / 2;
     int  imageHalfHeight = viewParams->height() / 2;
-    painter->drawPixmap(imageHalfWidth  - (int) ( (qreal) ( viewParams->radius() ) * 1.05 ),
-                        imageHalfHeight - (int) ( (qreal) ( viewParams->radius() ) * 1.05 ),
+    painter->drawPixmap(imageHalfWidth  - (int) ( (qreal) ( viewParams->radius() ) * 1.05 ) + viewParams->pan().x(),
+                        imageHalfHeight - (int) ( (qreal) ( viewParams->radius() ) * 1.05 ) + viewParams->pan().y(),
                         m_renderPixmap);
     return true;
 }

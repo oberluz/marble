@@ -53,6 +53,7 @@ public:
 
     QSize                m_size;         // width, height
 
+    QPoint               m_pan;          // x-y translation
 
     bool                 m_dirtyBox;
     GeoDataLatLonAltBox  m_viewLatLonAltBox;
@@ -81,6 +82,7 @@ ViewportParamsPrivate::ViewportParamsPrivate( Projection projection,
       m_radius( radius ),
       m_angularResolution( 0.25 * M_PI / fabs( (qreal)( m_radius ) ) ),
       m_size( size ),
+      m_pan( 0, 0 ),
       m_dirtyBox( true ),
       m_viewLatLonAltBox()
 {
@@ -207,6 +209,18 @@ void ViewportParams::setRadius(int newRadius)
     }
 }
 
+void ViewportParams::pan(QPoint translation)
+{
+    d->m_dirtyBox = true;
+
+    d->m_pan += translation;
+}
+
+QPoint ViewportParams::pan() const
+{
+    return ((d->m_projection == Spherical) ? d->m_pan : QPoint(0,0));
+}
+
 void ViewportParams::centerOn( qreal lon, qreal lat )
 {
     if ( !d->m_currentProjection->traversablePoles() ) {
@@ -262,6 +276,20 @@ QSize ViewportParams::size() const
     return d->m_size;
 }
 
+int ViewportParams::vwidth()  const
+{
+    return d->m_size.width() + 2 * abs(d->m_pan.x());
+}
+
+int ViewportParams::vheight() const
+{
+    return d->m_size.height() + 2 * abs(d->m_pan.y());
+}
+
+QSize ViewportParams::vsize() const
+{
+    return QSize(vwidth(), vheight());
+}
 
 void ViewportParams::setWidth(int newWidth)
 {

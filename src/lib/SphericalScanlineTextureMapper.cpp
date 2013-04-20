@@ -66,6 +66,7 @@ SphericalScanlineTextureMapper::SphericalScanlineTextureMapper( StackedTileLoade
     , m_repaintNeeded( true )
     , m_radius( 0 )
     , m_threadPool()
+    , m_pan ( QPoint( 0, 0 ) )
 {
 }
 
@@ -75,7 +76,15 @@ void SphericalScanlineTextureMapper::mapTexture( GeoPainter *painter,
                                                  const QRect &dirtyRect,
                                                  TextureColorizer *texColorizer )
 {
-    if ( m_canvasImage.size() != viewport->size() || m_radius != viewport->radius() ) {
+    Q_UNUSED( dirtyRect);
+
+    painter->save();
+    QPoint pan = viewport->pan();
+
+    if ( m_canvasImage.size() != viewport->size() || m_radius != viewport->radius() || pan != m_pan ) {
+
+        m_pan = pan;
+
         const QImage::Format optimalFormat = ScanlineTextureMapperContext::optimalCanvasImageFormat( viewport );
 
         if ( m_canvasImage.size() != viewport->size() || m_canvasImage.format() != optimalFormat ) {
@@ -102,10 +111,11 @@ void SphericalScanlineTextureMapper::mapTexture( GeoPainter *painter,
 
     const int radius = (int)(1.05 * (qreal)(viewport->radius()));
 
-    QRect rect( viewport->width() / 2 - radius, viewport->height() / 2 - radius,
+    QRect rect( viewport->width() / 2 - radius + pan.x(), viewport->height() / 2 - radius + pan.y(),
                 2 * radius, 2 * radius);
-    rect = rect.intersect( dirtyRect );
     painter->drawImage( rect, m_canvasImage, rect );
+
+    painter->restore();
 }
 
 void SphericalScanlineTextureMapper::setRepaintNeeded()
@@ -120,16 +130,29 @@ void SphericalScanlineTextureMapper::mapTexture( const ViewportParams *viewport,
 
     // Initialize needed constants:
 
-    const int imageHeight = m_canvasImage.height();
+    const int viewportHeight = viewport->height();
     const qint64  radius      = viewport->radius();
 
     // Calculate the actual y-range of the map on the screen 
     const int skip = ( mapQuality == LowQuality ) ? 1 : 0;
-    const int yTop = ( ( imageHeight / 2 - radius < 0 )
-                       ? 0 : imageHeight / 2 - radius );
-    const int yBottom = ( (yTop == 0)
-                          ? imageHeight - skip
-                          : yTop + radius + radius - skip );
+    const int pany = viewport->pan().y();
+    int yTop = 0;
+    if ( viewportHeight / 2 - radius + pany > 0 )
+    {
+        yTop = viewportHeight / 2 - radius + pany;
+        if ( yTop > viewportHeight )
+            yTop = viewportHeight;
+    }
+    int yBottom = 0;
+    if ( viewportHeight / 2 + radius + pany > 0 )
+    {
+        yBottom = viewportHeight / 2 + radius + pany - skip;
+        if ( yBottom > viewportHeight )
+            yBottom = viewportHeight - skip;
+    }
+
+    if ( yTop == yBottom )
+        return;
 
     const int numThreads = m_threadPool.maxThreadCount();
     const int yStep = ( yBottom - yTop ) / numThreads;
@@ -147,8 +170,10 @@ void SphericalScanlineTextureMapper::mapTexture( const ViewportParams *viewport,
 
 void SphericalScanlineTextureMapper::RenderJob::run()
 {
-    const int imageHeight = m_canvasImage->height();
+    const int imageHeight = m_canvasImage->height()  + 2 * m_viewport->pan().y();
     const int imageWidth  = m_canvasImage->width();
+    const int viewportWidth = m_viewport->width();
+    const int panx = m_viewport->pan().x();
     const qint64  radius  = m_viewport->radius();
     const qreal  inverseRadius = 1.0 / (qreal)(radius);
 
@@ -200,17 +225,31 @@ void SphericalScanlineTextureMapper::RenderJob::run()
         // In that situation xLeft equals zero.
         // For xRight the situation is similar.
 
-        const int xLeft  = ( ( imageWidth / 2 - rx > 0 )
-                             ? imageWidth / 2 - rx : 0 ); 
-        const int xRight = ( ( imageWidth / 2 - rx > 0 )
-                             ? xLeft + rx + rx : imageWidth );
+        int xLeft  = 0;
+        if ( viewportWidth / 2 - rx + panx > 0 )
+        {
+            xLeft = viewportWidth / 2 - rx + panx;
+            if ( xLeft > viewportWidth )
+                xLeft = viewportWidth;
+        }
+
+        int xRight = 0;
+        if ( viewportWidth / 2 + rx + panx > 0 )
+        {
+            xRight = viewportWidth / 2 + rx + panx;
+            if (xRight > viewportWidth)
+                xRight = viewportWidth;
+        }
+
+        if ( xLeft == xRight )
+            continue;
 
         QRgb * scanLine = (QRgb*)( m_canvasImage->scanLine( y ) ) + xLeft;
 
-        const int xIpLeft  = ( imageWidth / 2 - rx > 0 ) ? n * (int)( xLeft / n + 1 )
-                                                         : 1;
-        const int xIpRight = ( imageWidth / 2 - rx > 0 ) ? n * (int)( xRight / n - 1 )
-                                                         : n * (int)( xRight / n - 1 ) + 1; 
+        const int xIpLeft  = ( viewportWidth / 2 - rx + panx > 0 ) ? n * (int)( xLeft / n + 1 )
+                                                                   : 1;
+        const int xIpRight = ( viewportWidth / 2 - rx + panx > 0 ) ? n * (int)( xRight / n - 1 )
+                                                                   : n * (int)( xRight / n - 1 ) + 1;
 
         // Decrease pole distortion due to linear approximation ( y-axis )
         bool crossingPoleArea = false;
@@ -251,7 +290,7 @@ void SphericalScanlineTextureMapper::RenderJob::run()
 
             // Evaluate more coordinates for the 3D position vector of
             // the current pixel.
-            const qreal qx = (qreal)( x - imageWidth / 2 ) * inverseRadius;
+            const qreal qx = (qreal)( x - viewportWidth / 2 - panx ) * inverseRadius;
             const qreal qr2z = qr - qx * qx;
             const qreal qz = ( qr2z > 0.0 ) ? sqrt( qr2z ) : 0.0;
 
