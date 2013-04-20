@@ -241,7 +241,8 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
     const bool antialiased =    mapQuality == HighQuality
                              || mapQuality == PrintQuality;
 
-    GeoPainter painter( &m_coastImage, viewport, mapQuality );
+    GeoPainter painter( &m_coastImage, viewport, mapQuality);
+    painter.setClipping(false);
     painter.setRenderHint( QPainter::Antialiasing, antialiased );
     painter.translate(viewport->pan());
 
