@@ -94,10 +94,6 @@ bool AbstractDataPlugin::render( GeoPainter *painter, ViewportParams *viewport,
     Q_UNUSED( renderPos );
     Q_UNUSED( layer );
 
-    if ( !d->m_model || !isInitialized() ) {
-        return true;
-    }
-
     if ( d->m_delegate ) {
         handleViewportChange( viewport );
     } else {
@@ -196,7 +192,7 @@ QObject *AbstractDataPlugin::favoritesModel()
     return d->m_model ? d->m_model->favoritesModel() : 0;
 }
 
-void AbstractDataPlugin::handleViewportChange( ViewportParams* viewport )
+void AbstractDataPlugin::handleViewportChange( const ViewportParams *viewport )
 {
     QList<AbstractDataPluginItem*> orphane = d->m_delegateInstances.keys();
     QList<AbstractDataPluginItem*> const items = d->m_model->items( viewport, numberOfItems() );
