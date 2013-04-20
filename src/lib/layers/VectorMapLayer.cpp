@@ -8,6 +8,8 @@
 // Copyright 2011      Bernhard Beschow <bbeschow@cs.tu-berlin.de>
 //
 
+#include "GeoPainter.h"
+#include "ViewportParams.h"
 #include "VectorMapLayer.h"
 
 #include "VectorComposer.h"
@@ -34,7 +36,14 @@ bool VectorMapLayer::render( GeoPainter *painter,
     Q_UNUSED( renderPos )
     Q_UNUSED( layer )
 
+    bool clip = painter->isClipping();
+    if (viewport->projection() == Spherical && !viewport->pan().isNull() )
+        painter->setClipping( false );
+
     m_vectorComposer->paintVectorMap( painter, viewport );
+
+    if ( viewport->projection() == Spherical && !viewport->pan().isNull() )
+        painter->setClipping( clip );
 
     return true;
 }

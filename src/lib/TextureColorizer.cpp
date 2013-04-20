@@ -242,7 +242,8 @@ void TextureColorizer::colorize( QImage *origimg, const ViewportParams *viewport
                              || mapQuality == PrintQuality;
 
     GeoPainter painter( &m_coastImage, viewport, mapQuality);
-    painter.setClipping(false);
+    if ( viewport->projection() == Spherical && !viewport->pan().isNull() )
+        painter.setClipping(false);
     painter.setRenderHint( QPainter::Antialiasing, antialiased );
     painter.translate(viewport->pan());
 
