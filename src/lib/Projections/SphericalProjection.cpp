@@ -177,8 +177,8 @@ bool SphericalProjection::screenCoordinates( const GeoDataCoordinates &coordinat
     y = ((qreal)(viewport->height()) / 2.0 - pixelAltitude * qpos.v[Q_Y]);
 
     // Skip placemarks that are outside the screen area
-    if ( *x + size.width() / 2.0 < 0.0 || *x >= viewport->width() + size.width() / 2.0 
-         || y + size.height() / 2.0 < 0.0 || y >= viewport->height() + size.height() / 2.0 )
+    if ( *x + size.width() / 2.0 + viewport->pan().x() < 0.0 || *x >= viewport->width() + size.width() / 2.0 + viewport->pan().x()
+         || y + size.height() / 2.0 + viewport->pan().y() < 0.0 || y >= viewport->height() + size.height() / 2.0 + viewport->pan().y() )
     {
         globeHidesPoint = false;
         return false;

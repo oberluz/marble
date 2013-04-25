@@ -256,6 +256,7 @@ void RoutingLayerPrivate::renderAlternativeRoutes( GeoPainter *painter )
 
 void RoutingLayerPrivate::renderRoute( GeoPainter *painter )
 {
+    painter->translate( -m_marbleWidget->viewport()->pan() );
     GeoDataLineString waypoints = m_routingModel->route().path();
 
     QPen standardRoutePen( m_marbleWidget->model()->routingManager()->routeColorStandard() );
@@ -311,6 +312,7 @@ void RoutingLayerPrivate::renderRoute( GeoPainter *painter )
             }
         }
     }
+    painter->translate( m_marbleWidget->viewport()->pan() );
 
     if ( m_viewContext == Animation ) {
         return;
@@ -693,9 +695,11 @@ bool RoutingLayer::render( GeoPainter *painter, ViewportParams *viewport,
         d->renderPlacemarks( painter );
     }
 
+    painter->translate( -viewport->pan() );
     if ( d->m_alternativeRoutesModel ) {
         d->renderAlternativeRoutes( painter );
     }
+    painter->translate( viewport->pan() );
 
     d->renderRoute( painter );
 
