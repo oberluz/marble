@@ -90,28 +90,6 @@ endif(EXPERIMENTAL_PYTHON_BINDINGS)
 #### End Python support ####
 
 ####################################################
-# build unit tests
-
-INCLUDE (CTest)
-ENABLE_TESTING()
-
-
-if( QTONLY AND NOT WIN32 )
-    option( BUILD_MARBLE_TESTS "build marble tests if building QTONLY " ON )
-    if( BUILD_MARBLE_TESTS )
-        INCLUDE(CTest)
-    endif( BUILD_MARBLE_TESTS )
-else()
-    set( BUILD_MARBLE_TESTS ${KDE4_BUILD_TESTS} )
-endif()
-
-if( BUILD_MARBLE_TESTS )
-#  SET (TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/tests/test_data")
-  #where unit test binaries should be installed to and run from
-#  SET (MARBLE_TEST_DIR   ${CMAKE_CURRENT_BINARY_DIR}/tests)
-endif( BUILD_MARBLE_TESTS )
-
-####################################################
 # minimum required cmake version
 if( QTONLY )
     # all previous releases lack QT_QTSCRIPT_LIBRARY needed for panoramio
@@ -338,7 +316,6 @@ add_subdirectory(data)
 
 include(DistTarget)
 
-add_subdirectory(tests)
 
 ####################################################
 # Install extra files

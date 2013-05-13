@@ -51,6 +51,7 @@ private:
     QTimer m_repeatPressTimer;
     Qt::ArrowType m_arrowPressed;
     int m_repetitions;
+    bool m_shiftPressed;
 
     MarbleWidget *m_marbleWidget;
     QString m_imagePath;

@@ -630,21 +630,25 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
 
 		    if (event->modifiers() & Qt::ShiftModifier && MarbleWidgetInputHandler::d->m_widget->projection() == Spherical )
 		    {
-                        const bool isMouseAboveWidget = ( event->x() > 0 && event->x() <= MarbleWidgetInputHandler::d->m_widget->viewport()->width() &&
-                                                          event->y() > 0 && event->y() <= MarbleWidgetInputHandler::d->m_widget->viewport()->height() );
-                       
-                        if ( isMouseAboveWidget )
-                        {
-                            QTransform screen2World = MarbleWidgetInputHandler::d->m_widget->transform().inverted();
+                        QTransform screen2World = MarbleWidgetInputHandler::d->m_widget->transform().inverted();
 
-                            QLine l(d->m_moveClickLoc, event->pos());
-                            QLine transLine = screen2World.map(l);
+                        QLine l(d->m_moveClickLoc, event->pos());
+                        QLine transLine = screen2World.map(l);
 
-                            MarbleWidgetInputHandler::d->m_widget->pan(transLine.dx(), transLine.dy());
-                            d->m_moveClickLoc = event->pos();
+                        MarbleWidgetInputHandler::d->m_widget->pan(transLine.dx(), transLine.dy() );
+                        d->m_moveClickLoc = event->pos();
 
-                            //qDebug() << "pan (" << transLine.dx() << "," << transLine.dy() << ")";
-                        }
+                        ViewportParams* viewport = MarbleWidgetInputHandler::d->m_widget->viewport();
+                        qreal dx = viewport->radius() * transLine.dx();
+                        qreal dy = viewport->radius() * transLine.dy();
+                        qreal distance = MarbleWidgetInputHandler::d->m_widget->distance();
+                        qreal theta = asin ( sqrt( pow( dx, 2 ) / ( pow( distance, 2 ) + pow( dx, 2 ) ) ) );
+                        qreal dirx = ( dx >= 0 ? -1.0 : 1.0 );
+                        qreal phi = asin ( sqrt( pow( dy, 2 ) / ( pow( distance, 2 ) + pow( dy, 2 ) ) ) );
+                        qreal diry = ( dy >= 0 ? -1.0 : 1.0 );
+                        MarbleWidgetInputHandler::d->m_widget->rotateBy( theta * dirx , phi * diry );
+
+                        //qDebug() << "pan (" << transLine.dx() << "," << transLine.dy() << ")";
 
                         return QObject::eventFilter( o, e );
 		    }

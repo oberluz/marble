@@ -24,6 +24,7 @@ ArrowDiscWidget::ArrowDiscWidget( QWidget *parent ) :
     QWidget( parent ),
     m_arrowPressed( Qt::NoArrow ),
     m_repetitions( 0 ),
+    m_shiftPressed ( false ),
     m_marbleWidget( 0 ),
     m_imagePath( "marble/navigation/navigational_arrows" )
 {
@@ -66,6 +67,7 @@ void ArrowDiscWidget::mousePressEvent( QMouseEvent *mouseEvent )
 {
     if ( mouseEvent->button() == Qt::LeftButton ) {
 
+        m_shiftPressed = mouseEvent->modifiers() & Qt::ShiftModifier;
         if ( !m_initialPressTimer.isActive() && !m_repeatPressTimer.isActive() ) {
             m_repetitions = 0;
             m_initialPressTimer.start( 300 );
@@ -78,19 +80,19 @@ void ArrowDiscWidget::mousePressEvent( QMouseEvent *mouseEvent )
             break;
         case Qt::UpArrow:
             m_imagePath = "marble/navigation/navigational_arrows_press_top";
-            m_marbleWidget->moveUp();
+            ( mouseEvent->modifiers() & Qt::ShiftModifier) ? m_marbleWidget->panUp() : m_marbleWidget->moveUp();
             break;
         case Qt::DownArrow:
             m_imagePath = "marble/navigation/navigational_arrows_press_bottom";
-            m_marbleWidget->moveDown();
+            ( mouseEvent->modifiers() & Qt::ShiftModifier) ? m_marbleWidget->panDown() : m_marbleWidget->moveDown();
             break;
         case Qt::LeftArrow:
             m_imagePath = "marble/navigation/navigational_arrows_press_left";
-            m_marbleWidget->moveLeft();
+            ( mouseEvent->modifiers() & Qt::ShiftModifier) ? m_marbleWidget->panLeft() : m_marbleWidget->moveLeft();
             break;
         case Qt::RightArrow:
             m_imagePath = "marble/navigation/navigational_arrows_press_right";
-            m_marbleWidget->moveRight();
+            ( mouseEvent->modifiers() & Qt::ShiftModifier) ? m_marbleWidget->panRight() : m_marbleWidget->moveRight();
             break;
         }
     }
@@ -133,16 +135,16 @@ void ArrowDiscWidget::repeatPress()
         case Qt::NoArrow:
             break;
         case Qt::UpArrow:
-            m_marbleWidget->moveUp();
+            ( m_shiftPressed ) ? m_marbleWidget->panUp() : m_marbleWidget->moveUp();
             break;
         case Qt::DownArrow:
-            m_marbleWidget->moveDown();
+            ( m_shiftPressed ) ? m_marbleWidget->panDown() : m_marbleWidget->moveDown();
             break;
         case Qt::LeftArrow:
-            m_marbleWidget->moveLeft();
+            ( m_shiftPressed ) ? m_marbleWidget->panLeft() : m_marbleWidget->moveLeft();
             break;
         case Qt::RightArrow:
-            m_marbleWidget->moveRight();
+            ( m_shiftPressed ) ? m_marbleWidget->panRight() : m_marbleWidget->moveRight();
             break;
         }
     } else {

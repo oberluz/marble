@@ -199,7 +199,7 @@ void AbstractDataPlugin::handleViewportChange( const ViewportParams *viewport )
     foreach( AbstractDataPluginItem* item, items ) {
         qreal x, y;
         Marble::GeoDataCoordinates const coordinates = item->coordinate();
-        if (!stationary())
+        if ( !stationary() )
         {
             x += viewport->pan().x();
             y += viewport->pan().y();
