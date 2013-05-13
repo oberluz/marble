@@ -63,7 +63,6 @@ SphericalScanlineTextureMapper::RenderJob::RenderJob( StackedTileLoader *tileLoa
 SphericalScanlineTextureMapper::SphericalScanlineTextureMapper( StackedTileLoader *tileLoader )
     : TextureMapperInterface()
     , m_tileLoader( tileLoader )
-    , m_repaintNeeded( true )
     , m_radius( 0 )
     , m_threadPool()
     , m_pan ( QPoint( 0, 0 ) )
@@ -109,18 +108,13 @@ void SphericalScanlineTextureMapper::mapTexture( GeoPainter *painter,
         m_repaintNeeded = false;
     }
 
-    const int radius = (int)(1.05 * (qreal)(viewport->radius()));
+    const int radius = viewport->radius();
 
     QRect rect( viewport->width() / 2 - radius + pan.x(), viewport->height() / 2 - radius + pan.y(),
                 2 * radius, 2 * radius);
     painter->drawImage( rect, m_canvasImage, rect );
 
     painter->restore();
-}
-
-void SphericalScanlineTextureMapper::setRepaintNeeded()
-{
-    m_repaintNeeded = true;
 }
 
 void SphericalScanlineTextureMapper::mapTexture( const ViewportParams *viewport, int tileZoomLevel, MapQuality mapQuality )

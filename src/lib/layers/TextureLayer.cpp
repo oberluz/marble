@@ -61,7 +61,7 @@ public:
     int m_tileZoomLevel;
     TextureMapperInterface *m_texmapper;
     TextureColorizer *m_texcolorizer;
-    QVector<const GeoSceneTiled *> m_textures;
+    QVector<const GeoSceneTextureTile *> m_textures;
     const GeoSceneGroup *m_textureLayerSettings;
     QString m_runtimeTrace;
     // For scheduling repaints
@@ -101,29 +101,24 @@ void TextureLayer::Private::mapChanged()
 
 void TextureLayer::Private::updateTextureLayers()
 {
-    QVector<GeoSceneTiled const *> result;
+    QVector<GeoSceneTextureTile const *> result;
 
-    foreach ( const GeoSceneTiled *candidate, m_textures ) {
-
-        // Check if the GeoSceneTiled is a TextureTile or VectorTile.
-        // Only TextureTiles have to be used.
-        if ( candidate->nodeType() == GeoSceneTypes::GeoSceneTextureTileType ){
-            bool enabled = true;
-            if ( m_textureLayerSettings ) {
-                const bool propertyExists = m_textureLayerSettings->propertyValue( candidate->name(), enabled );
-                enabled |= !propertyExists; // if property doesn't exist, enable texture nevertheless
-            }
-            if ( enabled ) {
-                result.append( candidate );
-                mDebug() << "enabling texture" << candidate->name();
-            } else {
-                mDebug() << "disabling texture" << candidate->name();
-            }
+    foreach ( const GeoSceneTextureTile *candidate, m_textures ) {
+        bool enabled = true;
+        if ( m_textureLayerSettings ) {
+            const bool propertyExists = m_textureLayerSettings->propertyValue( candidate->name(), enabled );
+            enabled |= !propertyExists; // if property doesn't exist, enable texture nevertheless
+        }
+        if ( enabled ) {
+            result.append( candidate );
+            mDebug() << "enabling texture" << candidate->name();
+        } else {
+            mDebug() << "disabling texture" << candidate->name();
         }
     }
 
     if ( !result.isEmpty() ) {
-        const GeoSceneTiled *const firstTexture = result.at( 0 );
+        const GeoSceneTextureTile *const firstTexture = result.at( 0 );
         m_layerDecorator.setLevelZeroLayout( firstTexture->levelZeroColumns(), firstTexture->levelZeroRows() );
         m_layerDecorator.setThemeId( "maps/" + firstTexture->sourceDir() );
     }
@@ -135,9 +130,7 @@ void TextureLayer::Private::updateTile( const TileId &tileId, const QImage &tile
     if ( tileImage.isNull() )
         return; // keep tiles in cache to improve performance
 
-    // updateTile needs to know if its an image or another type of file,
-    // so we indicate its format
-    m_tileLoader.updateTile( tileId, tileImage, 0 );
+    m_tileLoader.updateTile( tileId, tileImage );
 
     mapChanged();
 }
@@ -225,23 +218,16 @@ bool TextureLayer::render( GeoPainter *painter, ViewportParams *viewport,
     const int levelZeroHight = d->m_tileLoader.tileSize().height() * d->m_tileLoader.tileRowCount( 0 );
     const int levelZeroMinDimension = qMin( levelZeroWidth, levelZeroHight );
 
-    qreal linearLevel = ( 4.0 * (qreal)( viewport->radius() ) / (qreal)( levelZeroMinDimension ) );
-
-    if ( linearLevel < 1.0 )
-        linearLevel = 1.0; // Dirty fix for invalid entry linearLevel
+    // limit to 1 as dirty fix for invalid entry linearLevel
+    const qreal linearLevel = qMax( 1.0, viewport->radius() * 4.0 / levelZeroMinDimension );
 
     // As our tile resolution doubles with each level we calculate
     // the tile level from tilesize and the globe radius via log(2)
+    const qreal tileLevelF = qLn( linearLevel ) / qLn( 2.0 ) * 1.00001;  // snap to the sharper tile level a tiny bit earlier
+                                                                         // to work around rounding errors when the radius
+                                                                         // roughly equals the global texture width
 
-    qreal tileLevelF = qLn( linearLevel ) / qLn( 2.0 );
-    int tileLevel = (int)( tileLevelF * 1.00001 ); // snap to the sharper tile level a tiny bit earlier
-    // to work around rounding errors when the radius
-    // roughly equals the global texture width
-
-    //    mDebug() << "tileLevelF: " << tileLevelF << " tileLevel: " << tileLevel;
-
-    if ( tileLevel > d->m_tileLoader.maximumTileLevel() )
-        tileLevel = d->m_tileLoader.maximumTileLevel();
+    const int tileLevel = qMin<int>( d->m_tileLoader.maximumTileLevel(), tileLevelF );
 
     if ( tileLevel != d->m_tileZoomLevel ) {
         d->m_tileZoomLevel = tileLevel;
@@ -295,10 +281,11 @@ void TextureLayer::setShowTileId( bool show )
     reset();
 }
 
-void TextureLayer::setupTextureMapper( Projection projection )
+void TextureLayer::setProjection( Projection projection )
 {
-    if ( d->m_textures.isEmpty() )
+    if ( d->m_textures.isEmpty() ) {
         return;
+    }
 
     // FIXME: replace this with an approach based on the factory method pattern.
     delete d->m_texmapper;
@@ -353,7 +340,7 @@ void TextureLayer::downloadStackedTile( const TileId &stackedTileId )
     d->m_tileLoader.downloadStackedTile( stackedTileId );
 }
 
-void TextureLayer::setMapTheme( const QVector<const GeoSceneTiled *> &textures, const GeoSceneGroup *textureLayerSettings, const QString &seaFile, const QString &landFile )
+void TextureLayer::setMapTheme( const QVector<const GeoSceneTextureTile *> &textures, const GeoSceneGroup *textureLayerSettings, const QString &seaFile, const QString &landFile )
 {
     delete d->m_texcolorizer;
     d->m_texcolorizer = 0;

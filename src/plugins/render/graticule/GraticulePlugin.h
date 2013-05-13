@@ -219,7 +219,6 @@ class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
     QPen m_equatorCirclePen;
     QPen m_tropicsCirclePen;
     QPen m_gridCirclePen;
-    QPen m_shadowPen;
 
     bool m_isInitialized;
 
@@ -227,8 +226,6 @@ class GraticulePlugin : public RenderPlugin, public DialogConfigurationInterface
 
     Ui::GraticuleConfigWidget *ui_configWidget;
     QDialog *m_configDialog;
-
-    QString m_utmBandLetters;
 };
 
 }

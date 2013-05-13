@@ -8,15 +8,13 @@
 // Copyright 2006-2010 Torsten Rahn <tackat@kde.org>
 // Copyright 2007      Inge Wallin  <ingwa@kde.org>
 // Copyright 2008-2010 Jens-Michael Hoffmann <jensmh@gmx.de>
+// Copyright 2010-2013 Bernhard Beschow <bbeschow@cs.tu-berlin.de>
 //
 
 #include "StackedTile.h"
-#include "StackedTile_p.h"
-
-#include <QtGui/QImage>
 
 #include "MarbleDebug.h"
-#include "Tile.h"
+#include "TextureTile.h"
 
 using namespace Marble;
 
@@ -58,10 +56,9 @@ static const uchar **jumpTableFromQImage8( const QImage &img )
 }
 
 
-StackedTilePrivate::StackedTilePrivate( const TileId &id, const QImage &resultImage, GeoDataDocument * resultVector, QVector<QSharedPointer<Tile> > const &tiles ) :
-      m_id( id ), 
+StackedTile::StackedTile( const TileId &id, const QImage &resultImage, QVector<QSharedPointer<TextureTile> > const &tiles ) :
+      Tile( id ),
       m_resultImage( resultImage ),
-      m_resultVector( resultVector ),
       m_depth( resultImage.depth() ),
       m_isGrayscale( resultImage.isGrayscale() ),
       m_tiles( tiles ),
@@ -70,15 +67,20 @@ StackedTilePrivate::StackedTilePrivate( const TileId &id, const QImage &resultIm
       m_byteCount( calcByteCount( resultImage, tiles ) ),
       m_isUsed( false )
 {
+    Q_ASSERT( !tiles.isEmpty() );
+
+    if ( jumpTable32 == 0 && jumpTable8 == 0 ) {
+        qWarning() << "Color depth" << m_depth << " is not supported.";
+    }
 }
 
-StackedTilePrivate::~StackedTilePrivate()
+StackedTile::~StackedTile()
 {
       delete [] jumpTable32;
       delete [] jumpTable8;
 }
 
-uint StackedTilePrivate::pixel( int x, int y ) const
+uint StackedTile::pixel( int x, int y ) const
 {
     if ( m_depth == 8 ) {
         if ( m_isGrayscale )
@@ -95,7 +97,7 @@ uint StackedTilePrivate::pixel( int x, int y ) const
     return m_resultImage.pixel( x, y );
 }
 
-uint StackedTilePrivate::pixelF( qreal x, qreal y, const QRgb& topLeftValue ) const
+uint StackedTile::pixelF( qreal x, qreal y, const QRgb& topLeftValue ) const
 {
     // Bilinear interpolation to determine the color of a subpixel 
 
@@ -210,57 +212,26 @@ uint StackedTilePrivate::pixelF( qreal x, qreal y, const QRgb& topLeftValue ) co
     return topLeftValue;
 }
 
-int StackedTilePrivate::calcByteCount( const QImage &resultImage, const QVector<QSharedPointer<Tile> > &tiles )
+int StackedTile::calcByteCount( const QImage &resultImage, const QVector<QSharedPointer<TextureTile> > &tiles )
 {
     int byteCount = resultImage.numBytes();
 
-    QVector<QSharedPointer<Tile> >::const_iterator pos = tiles.constBegin();
-    QVector<QSharedPointer<Tile> >::const_iterator const end = tiles.constEnd();
+    QVector<QSharedPointer<TextureTile> >::const_iterator pos = tiles.constBegin();
+    QVector<QSharedPointer<TextureTile> >::const_iterator const end = tiles.constEnd();
     for (; pos != end; ++pos )
         byteCount += (*pos)->byteCount();
 
     return byteCount;
 }
 
-
-StackedTile::StackedTile( TileId const &id, QImage const &resultImage, GeoDataDocument * resultVector, QVector<QSharedPointer<Tile> > const &tiles )
-    : d( new StackedTilePrivate( id, resultImage, resultVector, tiles ) )
-{
-    Q_ASSERT( !tiles.isEmpty() );
-
-    if ( d->m_resultImage.isNull() && d->m_resultVector->size() == 0 ) {
-        qWarning() << "A tile has no image and no vector data. Please rerun the application.";
-        return;
-    }
-
-    if ( d->jumpTable32 == 0 && d->jumpTable8 == 0 ) {
-        qWarning() << "Color depth" << d->m_depth << " is not supported.";
-    }
-}
-
-StackedTile::~StackedTile()
-{
-    delete d;
-}
-
-TileId const& StackedTile::id() const
-{
-    return d->m_id;
-}
-
 void StackedTile::setUsed( bool used )
 {
-    d->m_isUsed = used;
+    m_isUsed = used;
 }
 
 bool StackedTile::used() const
 {
-    return d->m_isUsed;
-}
-
-uint StackedTile::pixel( int x, int y ) const
-{
-    return d->pixel( x, y );
+    return m_isUsed;
 }
 
 uint StackedTile::pixelF( qreal x, qreal y ) const
@@ -270,36 +241,26 @@ uint StackedTile::pixelF( qreal x, qreal y ) const
 
     QRgb topLeftValue  =  pixel( iX, iY );
 
-    return d->pixelF( x, y, topLeftValue );
-}
-
-uint StackedTile::pixelF( qreal x, qreal y, const QRgb& topLeftValue ) const
-{
-    return d->pixelF( x, y, topLeftValue );
+    return pixelF( x, y, topLeftValue );
 }
 
 int StackedTile::depth() const
 {
-    return d->m_depth;
+    return m_depth;
 }
 
 int StackedTile::numBytes() const
 {
-    return d->m_byteCount;
+    return m_byteCount;
 }
 
-QVector<QSharedPointer<Tile> > StackedTile::tiles() const
+QVector<QSharedPointer<TextureTile> > StackedTile::tiles() const
 {
-    return d->m_tiles;
+    return m_tiles;
 }
 
 QImage const * StackedTile::resultImage() const
 {
-    return &d->m_resultImage;
-}
-
-GeoDataDocument * StackedTile::resultVectorData() const
-{
-    return d->m_resultVector;
+    return &m_resultImage;
 }
 

@@ -15,7 +15,7 @@
 
 #include "BlendingAlgorithms.h"
 
-#include "Tile.h"
+#include "TextureTile.h"
 
 #include <cmath>
 
@@ -25,7 +25,7 @@
 namespace Marble
 {
 
-void OverpaintBlending::blend( QImage * const bottom, Tile const * const top ) const
+void OverpaintBlending::blend( QImage * const bottom, TextureTile const * const top ) const
 {
     Q_ASSERT( bottom );
     Q_ASSERT( top );
@@ -38,11 +38,35 @@ void OverpaintBlending::blend( QImage * const bottom, Tile const * const top ) c
     painter.drawImage( 0, 0, *top->image() );
 }
 
+void GrayscaleBlending::blend( QImage * const bottom, TextureTile const * const top ) const
+{
+    Q_ASSERT( bottom );
+    Q_ASSERT( top );
+    Q_ASSERT( top->image() );
+    Q_ASSERT( bottom->size() == top->image()->size() );
+    Q_ASSERT( bottom->format() == QImage::Format_ARGB32_Premultiplied );
+    QImage const topImagePremult = top->image()->convertToFormat( QImage::Format_ARGB32_Premultiplied );
+
+    // Draw a grayscale version of the bottom image
+    int const width = bottom->width();
+    int const height = bottom->height();
+
+    for ( int y = 0; y < height; ++y ) {
+        for ( int x = 0; x < width; ++x ) {
+            QRgb const topPixel = topImagePremult.pixel( x, y );
+            int const gray = qGray( topPixel );
+            QRgb const grayPixel = qRgb( gray, gray, gray );
+            bottom->setPixel( x, y,grayPixel );
+        }
+    }
+
+}
+
 // pre-conditions:
 // - bottom and top image have the same size
 // - bottom image format is ARGB32_Premultiplied
 void IndependentChannelBlending::blend( QImage * const bottom,
-                                        Tile const * const top ) const
+                                        TextureTile const * const top ) const
 {
     QImage const * const topImage = top->image();
     Q_ASSERT( topImage );
@@ -296,7 +320,7 @@ qreal HalfDifferenceBlending::blendChannel( qreal const bottomColorIntensity,
 
 // Special purpose blendings
 
-void CloudsBlending::blend( QImage * const bottom, Tile const * const top ) const
+void CloudsBlending::blend( QImage * const bottom, TextureTile const * const top ) const
 {
     QImage const * const topImage = top->image();
     Q_ASSERT( topImage );

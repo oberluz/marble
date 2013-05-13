@@ -417,6 +417,11 @@ GeoDataTreeModel *MarbleModel::treeModel()
     return &d->m_treemodel;
 }
 
+const GeoDataTreeModel *MarbleModel::treeModel() const
+{
+    return &d->m_treemodel;
+}
+
 QAbstractItemModel *MarbleModel::placemarkModel()
 {
     return &d->m_sortproxy;

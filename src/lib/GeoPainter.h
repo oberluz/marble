@@ -213,16 +213,8 @@ class MARBLE_EXPORT GeoPainter : public ClipPainter
 */
     QRegion regionFromPoint ( const GeoDataPoint & point,
                               qreal strokeWidth = 3) const;
-    
-    
-/*!
-    \brief Draws a number of points at the given geographic positions.
-    All \a positions are stored in an array. The first \a pointCount points are
-    drawn using the painter's pen color.
-*/
-    void drawPoints ( const GeoDataCoordinates * positions, int pointCount );
 
-    
+
 /*!
     \brief Draws the given text at a given geographic position.
     The \a text is drawn starting at the given \a position using the painter's
@@ -294,41 +286,6 @@ class MARBLE_EXPORT GeoPainter : public ClipPainter
 */
     void drawPixmap ( const GeoDataCoordinates & centerPosition,
                       const QPixmap & pixmap /*, bool isGeoProjected = false */ );
-
-
-/*!
-    \brief Draws a line from the given start position to the end position.
-
-    The line is drawn using the current pen.
-    If \a isGeoProjected is true then the line is bent across the surface.
-    If \a isGeoProjected is false then a straight line in screen coordinates is
-    the result.
-
-    \see GeoDataCoordinates
-*/
-    void drawLine (  const GeoDataCoordinates & startPosition,
-                     const GeoDataCoordinates & endPosition,
-                     bool isGeoProjected = false );
-
-
-/*!
-    \brief Creates a region for a given line.
-
-    A QRegion object is created that represents the area covered by
-    GeoPainter::drawLine(). As such it can be used e.g. for input event handling
-    for objects that have been painted using
-    GeoPainter::drawLine( GeoDataLineString ).
-
-    The \a strokeWidth allows to extrude the QRegion by half the amount of
-    "stroke width" pixels. For input event handling it's always advisable to use
-    a width that is slightly bigger than the width of the painter's pen.
-
-    \see GeoDataCoordinates
-*/
-    QRegion regionFromLine ( const GeoDataCoordinates & startPosition,
-                             const GeoDataCoordinates & endPosition,
-                             bool isGeoProjected = false,
-                             qreal strokeWidth = 3 ) const;
 
 
 /*!
@@ -493,30 +450,16 @@ class MARBLE_EXPORT GeoPainter : public ClipPainter
 
 
 
-    // Reenabling QPainter methods.
-
-    void drawText ( int x, int y, const QString & text );
-    void drawText ( const QPointF & position, const QString & text );
-    void drawText ( const QPoint & position, const QString & text );
-    void drawText(  const QRect & rectangle, int flags, const QString & text,
-                    QRect * boundingRect = 0 );
-    void drawEllipse ( int x, int y, int width, int height );
-    void drawEllipse ( const QRectF & rectangle );
-    void drawImage ( const QRect & target, const QImage & image,
-                     const QRect & source,
-                     Qt::ImageConversionFlags flags = Qt::AutoColor );
-    void drawImage ( const QRect& rect, const QImage& image );
-    void drawImage ( const QRectF& rect, const QImage& image );
-    void drawPixmap ( int x, int y, const QPixmap & pixmap );
-    void drawPixmap ( const QPointF & point, const QPixmap & pixmap );
-    void drawPixmap ( const QPoint & point, const QPixmap & pixmap );
-    void drawPoint ( int x, int y );
-    void drawPolyline( const QPolygonF & polyline );
-    void drawPolygon( const QPolygonF & polygon );
-    void drawLine ( int x1, int y1, int x2, int y2 );
-    void drawRect ( const QRectF & rectangle );
-    void drawRect ( const QRect & rectangle );
-    void drawRect ( int x, int y, int width, int height );
+    // Reenabling QPainter+ClipPainter methods.
+    using QPainter::drawText;
+    using QPainter::drawEllipse;
+    using QPainter::drawImage;
+    using QPainter::drawPixmap;
+    using QPainter::drawPoint;
+    using ClipPainter::drawPolyline;
+    using ClipPainter::drawPolygon;
+    using QPainter::drawRect;
+    using QPainter::drawRoundedRect;
 
  private:
     Q_DISABLE_COPY( GeoPainter )

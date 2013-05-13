@@ -8,6 +8,7 @@
  Copyright 2008      Patrick Spendrin  <ps_ml@gmx.de>
  Copyright 2010      Thibaut Gridel  <tgridel@free.fr>
  Copyright 2012      Ander Pijoan <ander.pijoan@deusto.es>
+ Copyright 2013      Bernhard Beschow <bbeschow@cs.tu-berlin.de>
 */
 
 #ifndef MARBLE_VECTORTILELAYER_H
@@ -15,12 +16,13 @@
 
 #include "LayerInterface.h"
 #include <QtCore/QObject>
+#include <QtCore/QRunnable>
 
 #include "MarbleGlobal.h"
 #include "MarbleModel.h"
 #include "GeoDataDocument.h"
 #include "GeoDataLatLonAltBox.h"
-#include "GeoSceneTiled.h"
+#include "TileId.h"
 
 #include <QtCore/QSize>
 
@@ -33,8 +35,10 @@ namespace Marble
 
 class GeoPainter;
 class GeoSceneGroup;
+class GeoSceneVectorTile;
 class HttpDownloadManager;
 class SunLocator;
+class TileLoader;
 class ViewportParams;
 
 class VectorTileLayer : public QObject, public LayerInterface
@@ -43,7 +47,6 @@ class VectorTileLayer : public QObject, public LayerInterface
 
  public:
     VectorTileLayer( HttpDownloadManager *downloadManager,
-                  const SunLocator *sunLocator,
                   const PluginManager *pluginManager,
                   GeoDataTreeModel *treeModel);
 
@@ -51,60 +54,13 @@ class VectorTileLayer : public QObject, public LayerInterface
 
     QStringList renderPosition() const;
 
-    bool showSunShading() const;
-    bool showCityLights() const;
-
-    /**
-     * @brief Return the current tile zoom level. For example for OpenStreetMap
-     *        possible values are 1..18, for BlueMarble 0..6.
-     */
-    int tileZoomLevel() const;
-
-    QSize tileSize() const;
-
-    GeoSceneTiled::Projection tileProjection() const;
-
-    int tileColumnCount( int level ) const;
-    int tileRowCount( int level ) const;
-
-    qint64 volatileCacheLimit() const;
-
-    int preferredRadiusCeil( int radius ) const;
-    int preferredRadiusFloor( int radius ) const;
-
  public Q_SLOTS:
     bool render( GeoPainter *painter, ViewportParams *viewport,
                  const QString &renderPos = "NONE", GeoSceneLayer *layer = 0 );
 
-    void setShowSunShading( bool show );
-
-    void setShowCityLights( bool show );
-
-    void setShowTileId( bool show );
-
-    /**
-     * @brief  Set the Projection used for the map
-     * @param  projection projection type (e.g. Spherical, Equirectangular, Mercator)
-     */
-    void setupTextureMapper();
-
-    void setNeedsUpdate();
-
-    void setMapTheme( const QVector<const GeoSceneTiled *> &textures, GeoSceneGroup *textureLayerSettings );
-
-    void setVolatileCacheLimit( quint64 kilobytes );
+    void setMapTheme( const QVector<const GeoSceneVectorTile *> &textures, const GeoSceneGroup *textureLayerSettings );
 
     void reset();
-
-    void reload();
-
-    void downloadTile( const TileId &tileId );
-
-    void updateTile(TileId const & tileId, GeoDataDocument *document, QString const & format );
-
- Q_SIGNALS:
-    void tileLevelChanged( int );
-    void repaintNeeded();
 
  private:
     Q_PRIVATE_SLOT( d, void updateTextureLayers() )

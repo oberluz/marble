@@ -94,6 +94,7 @@
 #include "SearchInputWidget.h"
 #include "MarbleWidgetInputHandler.h"
 #include "Planet.h"
+#include "MapThemeDownloadDialog.h"
 
 // Marble non-library classes
 #include "ControlView.h"
@@ -147,6 +148,8 @@ MarblePart::MarblePart( QWidget *parentWidget, QObject *parent, const QVariantLi
     else {
         marbleLocale->setMeasurementSystem( QLocale::ImperialSystem );
     }
+
+    migrateNewstuffConfigFiles();
 
     m_externalEditorMapping[0] = "";
     m_externalEditorMapping[1] = "potlatch";
@@ -583,8 +586,6 @@ void MarblePart::writeSettings()
 
     // Get whether animations to the target are enabled
     MarbleSettings::setAnimateTargetVoyage( m_controlView->marbleWidget()->animationsEnabled() );
-
-    m_controlView->marbleModel()->home( homeLon, homeLat, homeZoom );
 
     // Map theme and projection
     MarbleSettings::setMapTheme( m_controlView->marbleWidget()->mapThemeId() );
@@ -1053,6 +1054,63 @@ void MarblePart::updateTileZoomLevel()
     }
 }
 
+void MarblePart::migrateNewstuffConfigFiles() const
+{
+    // Newstuff config files used to be in the KDE data directory of the user, but are now
+    // shared between Marble KDE and Marble Qt in Marble's data path of the user.
+    // This method moves an old KDE newstuff config file to the new location if the former
+    // exists and the latter not.
+    QFileInfo const target( MarbleDirs::localPath() + "/newstuff/marble-map-themes.knsregistry" );
+    if ( !target.exists() ) {
+        QString const source = KStandardDirs::locate( "data", "knewstuff3/marble.knsregistry" );
+        if ( !source.isEmpty() ) {
+            if ( !target.absoluteDir().exists() ) {
+                if ( !QDir::root().mkpath( target.absolutePath() ) ) {
+                    mDebug() << "Failed to create target directory " << target.absolutePath() << " needed for newstuff migration";
+                    return;
+                }
+            }
+
+            QFile registryFile( source );
+            if ( !registryFile.open( QFile::ReadOnly ) ) {
+                mDebug() << "Cannot parse newstuff xml file";
+                return;
+            }
+            QDomDocument xml;
+            if ( !xml.setContent( registryFile.readAll() ) ) {
+                mDebug() << "Cannot parse newstuff xml data";
+                return;
+            }
+
+            QDomNodeList items = xml.elementsByTagName( "stuff" );
+            for ( unsigned int i = 0; i < items.length(); ++i ) {
+                repairNode( items.item(i), "summary" );
+                repairNode( items.item(i), "author" );
+            }
+
+            QFile output( target.absoluteFilePath() );
+            if ( !output.open( QFile::WriteOnly ) ) {
+                mDebug() << "Cannot open " << target.absoluteFilePath() << " for writing";
+            } else {
+                QTextStream outStream( &output );
+                outStream << xml.toString( 2 );
+                outStream.flush();
+                output.close();
+            }
+        }
+    }
+}
+
+void MarblePart::repairNode( QDomNode node, const QString &child ) const
+{
+    int const size = node.namedItem( child ).toElement().text().size();
+    if ( size > 1024 ) {
+        QString const theme = node.namedItem( "name" ).toElement().text();
+        mDebug() << "Removing GHNS field " << child << " of map theme " << theme << ": Size " << size << " exceeds maximum size (see bug 319542).";
+        node.removeChild( node.namedItem( child ) );
+    }
+}
+
 void MarblePart::updateStatusBar()
 {
     if ( m_positionLabel )
@@ -1171,11 +1229,7 @@ void MarblePart::setupStatusBarActions()
 
 void MarblePart::showNewStuffDialog()
 {
-    QString  newStuffConfig = KStandardDirs::locate ( "data",
-                                                      "marble/marble.knsrc" );
-    kDebug() << "KNS config file:" << newStuffConfig;
-
-    QPointer<KNS3::DownloadDialog> dialog(new KNS3::DownloadDialog(newStuffConfig, m_controlView));
+    QPointer<MapThemeDownloadDialog> dialog( new MapThemeDownloadDialog( m_controlView ) );
     dialog->exec();
     delete dialog;
 }

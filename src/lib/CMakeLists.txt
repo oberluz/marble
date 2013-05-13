@@ -85,7 +85,6 @@ set(marblewidget_SRCS
     MarbleDebug.cpp
     Tile.cpp
     TextureTile.cpp
-    VectorTile.cpp
     TileCoordsPyramid.cpp
     TileLevelRangeWidget.cpp
     TileLoader.cpp
@@ -129,7 +128,7 @@ set(marblewidget_SRCS
     EquirectScanlineTextureMapper.cpp
     MercatorScanlineTextureMapper.cpp
     TileScalingTextureMapper.cpp
-    VectorTileMapper.cpp
+    VectorTileModel.cpp
     DiscCache.cpp
     ServerLayout.cpp
     StoragePolicy.cpp
@@ -228,6 +227,7 @@ set(marblewidget_SRCS
     GoToDialog.cpp
 
     MapWizard.cpp
+    MapThemeDownloadDialog.cpp
     GeoGraphicsScene.cpp
     ElevationModel.cpp
     MarbleLineEdit.cpp
@@ -267,6 +267,7 @@ set (marblewidget_UI
     routing/RoutingSettingsWidget.ui
     routing/RoutingProfileSettingsDialog.ui
     MapWizard.ui
+    MapThemeDownloadDialog.ui
 )
 
 # FIXME: cleaner approach of src/lib/MarbleControlBox.* vs. marble.qrc
@@ -440,6 +441,7 @@ else (APPLE AND QTONLY)
 
     LatLonEdit.h
     MapWizard.h
+    MapThemeDownloadDialog.h
     ElevationModel.h
 
     routing/AlternativeRoutesModel.h
