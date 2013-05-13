@@ -51,7 +51,7 @@ class MARBLE_EXPORT RenderPlugin : public QObject, public RenderPluginInterface
     Q_PROPERTY ( bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged )
     Q_PROPERTY ( bool visible READ visible WRITE setVisible NOTIFY visibilityChanged )
     Q_PROPERTY ( bool userCheckable READ isUserCheckable WRITE setUserCheckable NOTIFY userCheckableChanged )
-    Q_PROPERTY ( bool stationary READ stationary WRITE setStationary )
+    Q_PROPERTY ( bool screenStationary READ screenStationary WRITE setScreenStationary )
 
  public:
     /**
@@ -236,14 +236,19 @@ class MARBLE_EXPORT RenderPlugin : public QObject, public RenderPluginInterface
     void    setUserCheckable(bool isUserCheckable);
 
     /**
-     * Set the stationary property
+     * Set the screen stationary property.When set to true the layer items are painted in a
+     * fixed position on the screen and do not move when the globe is panned. When set to
+     * false the layer items are painted displaced according to the current amount of globe pan.
+     *
+     * @param value determines if plugun renders items on the globe or on a fixed screen position.
+     * @see screenStationary
      */
-    void setStationary( bool s );
+    void setScreenStationary( bool value );
     
     /**
-     * @return stationary property.
+     * @return screen stationary property.
      */
-    bool stationary() const;
+    bool screenStationary() const;
 
     /**
      * @brief Passes an empty set of settings to the plugin

@@ -17,7 +17,7 @@ class LayerInterface::Private
 {
   public:
     Private( )
-        : m_stationary( true )
+        : m_screenStationary( true )
     {
     }
 
@@ -25,7 +25,7 @@ class LayerInterface::Private
     {
     }
 
-    bool                m_stationary;
+    bool                m_screenStationary;
 };
 
 LayerInterface::LayerInterface()
@@ -50,14 +50,14 @@ QString LayerInterface::runtimeTrace() const
     return QString();
 }
 
-void LayerInterface::setStationary( bool value )
+void LayerInterface::setScreenStationary( bool value )
 {
-    d->m_stationary = value;
+    d->m_screenStationary = value;
 }
 
-bool LayerInterface::stationary() const
+bool LayerInterface::screenStationary() const
 {
-    return d->m_stationary;
+    return d->m_screenStationary;
 }
 
 } // namespace Marble

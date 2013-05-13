@@ -169,10 +169,10 @@ void LayerManager::renderLayers( GeoPainter *painter, ViewportParams *viewport )
         QTime timer;
         foreach( LayerInterface *layer, layers ) {
             timer.start();
-            if ( !layer->stationary() )
+            if ( ! layer->screenStationary() )
                 painter->translate( viewport->pan() );
             layer->render( painter, viewport, renderPosition, 0 );
-            if ( !layer->stationary() )
+            if ( ! layer->screenStationary() )
                 painter->translate( -viewport->pan() );
             traceList.append( QString("%2 ms %3").arg( timer.elapsed(),3 ).arg( layer->runtimeTrace() ) );
         }

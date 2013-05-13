@@ -77,14 +77,19 @@ public:
     virtual QString runtimeTrace() const;
 
     /**
-     * Set the stationary property
+     * Set the screenStationary property. When set to true the layer items are painted in a
+     * fixed position on the screen and do not move when the globe is panned. When set to
+     * false the layer items are painted displaced according to the current amount of globe pan.
+     *
+     * @param value determines if layer items are rendered on the globe or on a fixed screen position.
+     * @see screenStationary
      */
-    void setStationary( bool s );
+    void setScreenStationary( bool value );
     
     /**
-     * @return stationary property.
+     * @return screen stationary property.
      */
-    bool stationary() const;
+    bool screenStationary() const;
 
  private:
     class Private;

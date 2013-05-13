@@ -630,7 +630,8 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
 
 		    if (event->modifiers() & Qt::ShiftModifier && MarbleWidgetInputHandler::d->m_widget->projection() == Spherical )
 		    {
-                        QTransform screen2World = MarbleWidgetInputHandler::d->m_widget->transform().inverted();
+                        QTransform screen2World;
+                        screen2World = screen2World.inverted();
 
                         QLine l(d->m_moveClickLoc, event->pos());
                         QLine transLine = screen2World.map(l);

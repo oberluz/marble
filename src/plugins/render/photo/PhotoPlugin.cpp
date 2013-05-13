@@ -36,7 +36,6 @@ PhotoPlugin::PhotoPlugin()
       m_configDialog( 0 ),
       m_marbleWidget( 0 )
 {    
-    setStationary( false );
 }
 
 PhotoPlugin::PhotoPlugin( const MarbleModel *marbleModel )
@@ -49,7 +48,7 @@ PhotoPlugin::PhotoPlugin( const MarbleModel *marbleModel )
     // Plugin is not visible by default
     setVisible( false );
     // Plugin items should be panned
-    setStationary( false );
+    setScreenStationary( false );
 
     connect( this, SIGNAL(settingsChanged(QString)),
              this, SLOT(updateSettings()) );

@@ -60,7 +60,6 @@ StarsPlugin::StarsPlugin( const MarbleModel *marbleModel )
       m_celestialPoleBrush( Marble::Oxygen::aluminumGray5 )
 {
     prepareNames();
-    setStationary( true );
 }
 
 QStringList StarsPlugin::backendTypes() const

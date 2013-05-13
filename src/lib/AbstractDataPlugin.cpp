@@ -99,7 +99,7 @@ bool AbstractDataPlugin::render( GeoPainter *painter, ViewportParams *viewport,
     } else {
         QList<AbstractDataPluginItem*> items = d->m_model->items( viewport, numberOfItems() );
         painter->save();
-        if ( !stationary() )
+        if ( ! screenStationary() )
             painter->translate(viewport->pan());
 
         // Paint the most important item at last
@@ -107,7 +107,7 @@ bool AbstractDataPlugin::render( GeoPainter *painter, ViewportParams *viewport,
             items.at( i )->paintEvent( painter, viewport );
         }
 
-        if ( !stationary() )
+        if ( ! screenStationary() )
         painter->translate(-viewport->pan());
         painter->restore();
     }
@@ -199,7 +199,7 @@ void AbstractDataPlugin::handleViewportChange( const ViewportParams *viewport )
     foreach( AbstractDataPluginItem* item, items ) {
         qreal x, y;
         Marble::GeoDataCoordinates const coordinates = item->coordinate();
-        if ( !stationary() )
+        if ( ! screenStationary() )
         {
             x += viewport->pan().x();
             y += viewport->pan().y();

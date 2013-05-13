@@ -1103,7 +1103,7 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
      */
     virtual void customPaint( GeoPainter *painter );
 
-    QTransform transform() const;
+    //QTransform transform() const;
 
  private:
     Q_PRIVATE_SLOT( d, void updateMapTheme() )

@@ -27,7 +27,7 @@ MapInfoDialog::MapInfoDialog(QObject *parent) :
     m_widget( 0 ),
     m_adjustMap( false )
 {
-    setStationary( false );
+    setScreenStationary( false );
     connect( m_popupItem, SIGNAL(repaintNeeded()), this, SIGNAL(repaintNeeded()) );
     connect( m_popupItem, SIGNAL(hide()), this, SLOT(hidePopupItem()) );
 }

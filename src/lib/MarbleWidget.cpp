@@ -145,7 +145,6 @@ class MarbleWidgetPrivate
     // The model we are showing.
     MarbleModel     m_model;
     MarbleMap       m_map;
-    QTransform      m_worldTransform;
 
     bool m_animationsEnabled;
 
@@ -1472,11 +1471,6 @@ RoutingLayer* MarbleWidget::routingLayer()
 MapInfoDialog *MarbleWidget::mapInfoDialog()
 {
     return d->m_mapInfoDialog;
-}
-
-QTransform MarbleWidget::transform() const
-{
-    return d->m_worldTransform;
 }
 
 }

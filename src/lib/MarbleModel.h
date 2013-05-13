@@ -183,6 +183,9 @@ class MARBLE_EXPORT MarbleModel : public QObject
      */
     void setHome( const GeoDataCoordinates& homePoint, int zoom = 1050, int panx = 0, int pany = 0 );
 
+    void setGlobeCenterOffset( const QPoint &offset )
+    QPoint globeCenterOffset() const
+
     MapThemeManager *mapThemeManager();
 
     /**

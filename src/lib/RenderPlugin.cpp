@@ -38,7 +38,7 @@ class RenderPlugin::Private
           m_enabled(true),
           m_visible(true),
           m_userCheckable(true),
-          m_stationary( true )
+          m_screenStationary( true )
     {
     }
 
@@ -55,7 +55,7 @@ class RenderPlugin::Private
     bool                m_enabled;
     bool                m_visible;
     bool                m_userCheckable;
-    bool                m_stationary;
+    bool                m_screenStationary;
 };
 
 
@@ -182,14 +182,14 @@ bool RenderPlugin::isUserCheckable() const
     return d->m_userCheckable;
 }
 
-void RenderPlugin::setStationary( bool value )
+void RenderPlugin::setScreenStationary( bool value )
 {
-    d->m_stationary = value;
+    d->m_screenStationary = value;
 }
 
-bool RenderPlugin::stationary() const
+bool RenderPlugin::screenStationary() const
 {
-    return d->m_stationary;
+    return d->m_screenStationary;
 }
 
 QHash<QString,QVariant> RenderPlugin::settings() const
