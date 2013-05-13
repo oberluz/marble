@@ -372,28 +372,34 @@ void MarbleModel::setMapThemeId( const QString &mapThemeId )
     emit themeChanged( mapTheme->head()->mapThemeId() );
 }
 
-void MarbleModel::home( qreal &lon, qreal &lat, int& zoom, int& panX, int& panY ) const
+void MarbleModel::home( qreal &lon, qreal &lat, int& zoom ) const
 {
     d->m_homePoint.geoCoordinates( lon, lat, GeoDataCoordinates::Degree );
     zoom = d->m_homeZoom;
-    panX = d->m_homePan.x();
-    panY = d->m_homePan.y();
 }
 
-void MarbleModel::setHome( qreal lon, qreal lat, int zoom, int panx, int pany )
+void MarbleModel::setHome( qreal lon, qreal lat, int zoom )
 {
     d->m_homePoint = GeoDataCoordinates( lon, lat, 0, GeoDataCoordinates::Degree );
     d->m_homeZoom = zoom;
-    d->m_homePan = QPoint( panx, pany );
     emit homeChanged( d->m_homePoint );
 }
 
-void MarbleModel::setHome( const GeoDataCoordinates& homePoint, int zoom, int panx, int pany )
+void MarbleModel::setHome( const GeoDataCoordinates& homePoint, int zoom )
 {
     d->m_homePoint = homePoint;
     d->m_homeZoom = zoom;
-    d->m_homePan = QPoint( panx, pany );
     emit homeChanged( d->m_homePoint );
+}
+
+void MarbleModel::setGlobeCenterOffset( const QPoint &offset )
+{
+    d->m_homePan = offset;
+}
+
+QPoint MarbleModel::globeCenterOffset() const
+{
+    return d->m_homePan;
 }
 
 MapThemeManager *MarbleModel::mapThemeManager()

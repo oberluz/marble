@@ -542,8 +542,8 @@ void MainWindow::manageBookmarks()
 void MainWindow::setHome()
 {
     MarbleWidget *widget = m_controlView->marbleWidget();
-    widget->model()->setHome( widget->centerLongitude(), widget->centerLatitude(), widget->zoom(),
-                              widget->pan().x(), widget->pan().y() );
+    widget->model()->setGlobeCenterOffset( widget->pan() );
+    widget->model()->setHome( widget->centerLongitude(), widget->centerLatitude(), widget->zoom());
 }
 
 void MainWindow::openEditBookmarkDialog()
@@ -1070,12 +1070,14 @@ void MainWindow::readSettings(const QVariantMap& overrideSettings)
          );
 
          // Set home position
+         m_controlView->marbleModel()->setGlobeCenterOffset(
+            QPoint( settings.value("homePanX", 0).toInt(),
+            settings.value("homePanY", 0).toInt() )
+         );
          m_controlView->marbleModel()->setHome(
             settings.value("homeLongitude", 9.4).toDouble(),
             settings.value("homeLatitude", 54.8).toDouble(),
-            settings.value("homeZoom", 1050 ).toInt(),
-            settings.value("homePanX", 0).toInt(),
-            settings.value("homePanY", 0).toInt()
+            settings.value("homeZoom", 1050 ).toInt()
          );
 
          // Center on/Distance
@@ -1264,17 +1266,17 @@ void MainWindow::writeSettings()
          qreal homeLon = 0;
          qreal homeLat = 0;
          int homeZoom = 0;
-         int homePanX = 0;
-         int homePanY = 0;
-         m_controlView->marbleModel()->home( homeLon, homeLat, homeZoom, homePanX, homePanY );
+         QPoint homePan;
+         homePan = m_controlView->marbleModel()->globeCenterOffset( );
+         m_controlView->marbleModel()->home( homeLon, homeLat, homeZoom );
          QString  mapTheme = m_controlView->marbleWidget()->mapThemeId();
          int      projection = (int)( m_controlView->marbleWidget()->projection() );
 
          settings.setValue( "homeLongitude", homeLon );
          settings.setValue( "homeLatitude",  homeLat );
          settings.setValue( "homeZoom",      homeZoom );
-         settings.setValue( "homePanX",      homePanX );
-         settings.setValue( "homePanY",      homePanY );
+         settings.setValue( "homePanX",      homePan.x() );
+         settings.setValue( "homePanY",      homePan.y() );
 
          settings.setValue( "mapTheme",   mapTheme );
          settings.setValue( "projection", projection );

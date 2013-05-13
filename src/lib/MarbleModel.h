@@ -34,6 +34,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QVector>
+#include <QtCore/QPoint>
 
 #include "MarbleGlobal.h"
 
@@ -161,30 +162,33 @@ class MARBLE_EXPORT MarbleModel : public QObject
      * @param  lon  the longitude of the home point.
      * @param  lat  the latitude of the home point.
      * @param  zoom the default zoom level of the home point.
-     * @param  panx the default horizontal pan translation of the home point.
-     * @param  pany the default vertical pan translation of the home point.
      */
-    void home( qreal &lon, qreal &lat, int& zoom, int& panx, int& pany ) const;
+    void home( qreal &lon, qreal &lat, int& zoom ) const;
     /**
      * @brief  Set the home point
      * @param  lon  the longitude of the new home point.
      * @param  lat  the latitude of the new home point.
      * @param  zoom the default zoom level for the new home point.
-     * @param  panx the default horizontal pan translation for the new home point.
-     * @param  pany the default vertical pan translation for the new home point.
      */
-    void setHome( qreal lon, qreal lat, int zoom = 1050, int panx = 0, int pany = 0 );
+    void setHome( qreal lon, qreal lat, int zoom = 1050 );
     /**
      * @brief  Set the home point
      * @param  homePoint  the new home point.
      * @param  zoom       the default zoom level for the new home point.
-     * @param  panx       the default horizontal pan translation for the new home point.
-     * @param  pany       the default vertical pan translation for the new home point.
      */
-    void setHome( const GeoDataCoordinates& homePoint, int zoom = 1050, int panx = 0, int pany = 0 );
+    void setHome( const GeoDataCoordinates& homePoint, int zoom = 1050 );
 
-    void setGlobeCenterOffset( const QPoint &offset )
-    QPoint globeCenterOffset() const
+    /**
+     * @brief  Set the globe center offset
+     * @param  offset the globe center offset.
+     */
+    void setGlobeCenterOffset( const QPoint &offset );
+
+    /**
+     * @brief  Get the globe center offset
+     * @return  the globe center offset.
+     */
+    QPoint globeCenterOffset() const;
 
     MapThemeManager *mapThemeManager();
 

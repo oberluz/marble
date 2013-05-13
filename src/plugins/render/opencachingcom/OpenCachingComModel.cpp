@@ -126,8 +126,7 @@ void OpenCachingComModel::updateHome()
 {
     qreal lon, lat;
     int zoom;
-    int panX, panY;
-    marbleModel()->home( lon, lat, zoom, panX, panY );
+    marbleModel()->home( lon, lat, zoom );
     m_homeCoordinates = GeoDataCoordinates(lon, lat, 0, GeoDataCoordinates::Degree);
 }
 

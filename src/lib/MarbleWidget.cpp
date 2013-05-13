@@ -906,15 +906,15 @@ void MarbleWidget::goHome( FlyToMode mode )
     qreal  homeLon = 0;
     qreal  homeLat = 0;
     int homeZoom = 0;
-    int homePanx = 0;
-    int homePany = 0;
-    d->m_model.home( homeLon, homeLat, homeZoom, homePanx, homePany );
+    QPoint homePan;
+    homePan = d->m_model.globeCenterOffset( );
+    d->m_model.home( homeLon, homeLat, homeZoom );
 
     GeoDataLookAt target;
     target.setLongitude( homeLon, GeoDataCoordinates::Degree );
     target.setLatitude( homeLat, GeoDataCoordinates::Degree );
     target.setRange( 1000 * distanceFromZoom( homeZoom ) );
-    viewport()->pan(QPoint(homePanx - pan().x(), homePany - pan().y()));
+    viewport()->pan(QPoint(homePan.x() - pan().x(), homePan.y() - pan().y()));
     
 
     flyTo( target, mode );

@@ -199,8 +199,8 @@ QVariant TargetModel::homeData ( int role ) const
     case MarblePlacemarkModel::CoordinateRole: {
         qreal lon( 0.0 ), lat( 0.0 );
         int zoom( 0 );
-        int panX( 0 ), panY( 0 );
-        m_marbleModel->home( lon, lat, zoom, panX, panY );
+        m_marbleModel->setGlobeCenterOffset( QPoint( 0, 0 ) );
+        m_marbleModel->home( lon, lat, zoom );
         const GeoDataCoordinates coordinates = GeoDataCoordinates( lon, lat, 0, GeoDataCoordinates::Degree );
         return qVariantFromValue( coordinates );
     }
