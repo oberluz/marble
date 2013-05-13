@@ -633,8 +633,8 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
                         QTransform screen2World;
                         screen2World = screen2World.inverted();
 
-                        QLine l(d->m_moveClickLoc, event->pos());
-                        QLine transLine = screen2World.map(l);
+                        QLine line( d->m_moveClickLoc, event->pos() );
+                        QLine transLine = screen2World.map( line );
 
                         MarbleWidgetInputHandler::d->m_widget->pan(transLine.dx(), transLine.dy() );
                         d->m_moveClickLoc = event->pos();
@@ -686,7 +686,7 @@ bool MarbleWidgetDefaultInputHandler::eventFilter( QObject* o, QEvent* e )
             }
 
             QRect boundingRect = MarbleWidgetInputHandler::d->m_widget->mapRegion().boundingRect();
-            boundingRect = boundingRect.translated(MarbleWidgetInputHandler::d->m_widget->pan());
+            boundingRect.translate( MarbleWidgetInputHandler::d->m_widget->pan() );
 
             if ( boundingRect.width() != 0 ) {
                 dirX = (int)( 3 * ( event->x() - boundingRect.left() ) / boundingRect.width() ) - 1;

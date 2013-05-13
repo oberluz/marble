@@ -82,8 +82,8 @@ bool SphericalProjection::screenCoordinates( const qreal lon, const qreal lat,
     x = ( viewport->width()  / 2 + (qreal)( viewport->radius() ) * p.v[Q_X] );
     y = ( viewport->height() / 2 - (qreal)( viewport->radius() ) * p.v[Q_Y] );
  
-    return (( 0 <= ( y + viewport->pan().y() ) && y < viewport->vheight() )
-             && ( 0 <= ( x + viewport->pan().x() ) && x < viewport->vwidth() )
+    return (( 0 <= ( y + viewport->pan().y() ) && y < viewport->virtualHeight() )
+             && ( 0 <= ( x + viewport->pan().x() ) && x < viewport->virtualWidth() )
              && p.v[Q_Z] > 0 );
 }
 
@@ -232,8 +232,8 @@ GeoDataLatLonAltBox SphericalProjection::latLonAltBox( const QRect& screenRect,
     // analytically the lon-/lat- range.
     qreal pitch = GeoDataCoordinates::normalizeLat( viewport->planetAxis().pitch() );
 
-    if ( 2.0 * viewport->radius() <= viewport->vheight()
-         &&  2.0 * viewport->radius() <= viewport->vwidth() )
+    if ( 2.0 * viewport->radius() <= viewport->virtualHeight()
+         &&  2.0 * viewport->radius() <= viewport->virtualWidth() )
     { 
         // Unless the planetaxis is in the screen plane the allowed longitude range
         // covers full -180 deg to +180 deg:
@@ -302,10 +302,10 @@ bool SphericalProjection::mapCoversViewport( const ViewportParams *viewport ) co
     }
     else
     {
-        qint64 w = viewport->vwidth();
-        qint64 h = viewport->vheight();
+        qint64 virtualWidth = viewport->virtualWidth();
+        qint64 virtualHeight = viewport->virtualHeight();
 
-        if ( 4 * radius * radius >= w * w + h * h )
+        if ( 4 * radius * radius >= virtualWidth * virtualWidth + virtualHeight * virtualHeight )
             return true;
     }
     return false;

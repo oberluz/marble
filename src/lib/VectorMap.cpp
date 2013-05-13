@@ -67,7 +67,9 @@ void VectorMap::sphericalCreateFromPntMap( const PntMap* pntmap,
     // square radius sometimes below, and it may cause an overflow. We
     // choose qreal because of some sqrt() calculations.
     qreal   radius     = viewport->radius();
-    qreal   imgradius2 = ( viewport->vwidth()  / 2 ) * ( viewport->vwidth()  / 2 ) + ( viewport->vheight() / 2 ) * ( viewport->vheight() / 2 );
+    const int virtualWidth = viewport->virtualWidth();
+    const int virtualHeight = viewport->virtualHeight();
+    qreal   imgradius2 = ( virtualWidth / 2 ) * ( virtualWidth / 2 ) + ( virtualHeight / 2 ) * ( virtualHeight / 2 );
 
     // zlimit: describes the lowest z value of the sphere that is
     //         visible on the screen.  This should happen in the

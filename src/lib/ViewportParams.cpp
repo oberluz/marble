@@ -209,7 +209,7 @@ void ViewportParams::setRadius(int newRadius)
     }
 }
 
-void ViewportParams::pan(QPoint translation)
+void ViewportParams::pan( const QPoint &translation )
 {
     d->m_dirtyBox = true;
 
@@ -276,19 +276,19 @@ QSize ViewportParams::size() const
     return d->m_size;
 }
 
-int ViewportParams::vwidth()  const
+int ViewportParams::virtualWidth()  const
 {
-    return d->m_size.width() + 2 * abs(d->m_pan.x());
+    return d->m_size.width() + 2 * abs( d->m_pan.x() );
 }
 
-int ViewportParams::vheight() const
+int ViewportParams::virtualHeight() const
 {
-    return d->m_size.height() + 2 * abs(d->m_pan.y());
+    return d->m_size.height() + 2 * abs( d->m_pan.y() );
 }
 
-QSize ViewportParams::vsize() const
+QSize ViewportParams::virtualSize() const
 {
-    return QSize(vwidth(), vheight());
+    return QSize( virtualWidth(), virtualHeight() );
 }
 
 void ViewportParams::setWidth(int newWidth)

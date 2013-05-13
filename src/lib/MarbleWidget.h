@@ -644,21 +644,25 @@ class MARBLE_EXPORT MarbleWidget : public QWidget
     void rotateBy( const qreal deltaLon, const qreal deltaLat, FlyToMode mode = Instant );
 
     /**
-     * @brief  Pan the view
+     * @brief  Pan the view.
      * @param  x  horizontal distance
      * @param  y  vertical distance
+     *
+     * Spherical projection panning is the action of translating the globe (or the scene
+     * viewpoint) in a plane orthogonal to the line of sight of the viewer. For flat maps
+     * (equirect or mercator projections) the rotation and panning actions are equivalent.
      */
     void pan( const int x, const int y );
 
     /**
      * @brief  Pan the view
-     * @param  p  distance
+     * @param  offset offset
      */
-    void pan( const QPoint& p );
+    void pan( const QPoint& offset );
 
     /**
-     * @brief Returns the current pan displacement
-     * @return the current pan displacement
+     * @brief Returns the current pan offset
+     * @return the current pan offset
      */
     QPoint pan() const;
 

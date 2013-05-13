@@ -97,7 +97,7 @@ class MARBLE_EXPORT ViewportParams
 
     void centerOn( qreal lon, qreal lat );
 
-    void pan(QPoint translation);
+    void pan( const QPoint &translation );
     QPoint pan() const;
 
     Quaternion planetAxis() const;
@@ -107,9 +107,23 @@ class MARBLE_EXPORT ViewportParams
     int height() const;
     QSize size() const;
 
-    int vwidth() const;
-    int vheight() const;
-    QSize vsize() const;
+    /**
+     * @brief Get the viewport virtual width which equals the actual width plus
+     * twice the absolute value of the panning translation in the x direction.
+     */
+    int virtualWidth() const;
+    /**
+     * @brief Get the viewport virtual height which equals the actual height plus
+     * twice the absolute value of the panning translation in the y direction.
+     */
+    int virtualHeight() const;
+    /**
+     * @brief Get the viewport virtual size which equals the actual size plus
+     * twice the absolute value of the panning translation in the x and y directions.
+     * @see virtualWidth
+     * @see virtualHeight
+     */
+    QSize virtualSize() const;
 
     void setWidth(int newWidth);
     void setHeight(int newHeight);

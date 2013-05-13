@@ -1292,8 +1292,8 @@ bool StarsPlugin::render( GeoPainter *painter, ViewportParams *viewport,
             const int y = ( int )( viewport->height() / 2 - skyRadius * qpos.v[Q_Y] );
 
             // Skip placemarks that are outside the screen area
-            if ( x < 0 || x >= viewport->vwidth()
-                    || y < 0 || y >= viewport->vheight() )
+            if ( x < 0 || x >= viewport->virtualWidth()
+                    || y < 0 || y >= viewport->virtualHeight() )
                 continue;
 
             // Show star if it is brighter than magnitude threshold
